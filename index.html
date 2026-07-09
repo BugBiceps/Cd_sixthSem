@@ -1145,6 +1145,89 @@
           padding: 56px 32px 64px;
         }
       }
+      /* Custom Styles for Complete Notes */
+      .notes-code-block {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        line-height: 1.5;
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 14px;
+        margin: 16px 0;
+        overflow-x: auto;
+        white-space: pre;
+      }
+      .notes-diagram {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        line-height: 1.4;
+        background: var(--bg);
+        border: 1.5px dashed var(--border);
+        border-radius: var(--radius);
+        padding: 16px;
+        margin: 16px 0;
+        overflow-x: auto;
+        color: var(--accent);
+        white-space: pre;
+      }
+      .notes-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .notes-table th, .notes-table td {
+        border: 1px solid var(--border);
+        padding: 10px 12px;
+        text-align: left;
+      }
+      .notes-table th {
+        background: var(--code-bg);
+        font-weight: 600;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+      }
+      .notes-table tr:nth-child(even) {
+        background: rgba(0,0,0,0.015);
+      }
+      [data-theme="dark"] .notes-table tr:nth-child(even) {
+        background: rgba(255,255,255,0.015);
+      }
+      .notes-box {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px;
+        margin: 16px 0;
+        background: var(--bg-elevated);
+      }
+      .notes-box.exam {
+        border-left: 4px solid var(--accent);
+      }
+      .notes-box.interview {
+        border-left: 4px solid #d97706;
+      }
+      .notes-box.tip {
+        border-left: 4px solid #2563eb;
+      }
+      .notes-box-title {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .notes-box-title.exam {
+        color: var(--accent);
+      }
+      .notes-box-title.interview {
+        color: #d97706;
+      }
+      .notes-box-title.tip {
+        color: #2563eb;
+      }
     </style>
   </head>
   <body></body>
@@ -1627,50 +1710,683 @@
         <section class="page" data-id="notes-unit1">
           <div class="unit-eyebrow">Unit 1 — Notes</div>
           <h2 class="unit-title">Lexical Analysis</h2>
-          <p class="unit-intro">Core concepts: what a compiler does, its phases, and how lexical analysis tokenises source text.</p>
+          <p class="unit-intro">Core concepts: what a compiler does, its detailed phases, input buffering, regex tokens, transition diagrams, and the LEX tool.</p>
           <div class="stat-row">
-            <div class="stat"><div class="stat-val">6</div><div class="stat-label">key topics to know</div></div>
+            <div class="stat"><div class="stat-val">12</div><div class="stat-label">syllabus topics covered</div></div>
             <div class="stat"><div class="stat-val">~20%</div><div class="stat-label">exam weight</div></div>
             <div class="stat"><div class="stat-val">★★☆</div><div class="stat-label">difficulty level</div></div>
           </div>
+
+          <!-- TOPIC 1: INTRODUCTION OF COMPILER -->
           <div class="topic">
-            <div class="topic-title">Compiler vs Interpreter</div>
+            <div class="topic-title">Introduction of Compiler &amp; Translation Model</div>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              A <b>Compiler</b> is a specialized system software program that translates a source program written in a <b>high-level language</b> (like C, C++, Java, Rust) into an equivalent target program written in a <b>low-level language</b> (like assembly language or machine code) without changing the functional meaning of the source code.
+            </p>
+            <!-- SVG 1: Compiler Translation Model -->
+            <svg viewBox="0 0 600 120" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin: 16px 0; display: block; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 0;">
+              <defs>
+                <marker id="arrow-tm" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)" />
+                </marker>
+              </defs>
+              <rect x="20" y="25" width="150" height="70" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="4" />
+              <text x="95" y="58" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="var(--text)" text-anchor="middle">Source Program</text>
+              <text x="95" y="78" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">(High-Level C/Rust)</text>
+              <line x1="170" y1="60" x2="225" y2="60" stroke="var(--accent)" stroke-width="2" fill="none" marker-end="url(#arrow-tm)" />
+              <rect x="235" y="25" width="130" height="70" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2" rx="4" />
+              <text x="300" y="65" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="var(--accent)" text-anchor="middle">COMPILER</text>
+              <line x1="365" y1="60" x2="420" y2="60" stroke="var(--accent)" stroke-width="2" fill="none" marker-end="url(#arrow-tm)" />
+              <rect x="430" y="25" width="150" height="70" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="4" />
+              <text x="505" y="58" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="var(--text)" text-anchor="middle">Target Program</text>
+              <text x="505" y="78" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">(Machine Assembly)</text>
+            </svg>
+            <h4 style="font-size: 13px; font-weight: 600; margin: 12px 0 6px;">Why It Exists:</h4>
+            <ul class="qlist" style="margin-bottom: 16px;">
+              <li><b>Hardware Gap</b> — CPUs run on binary code. Compilers bridge the abstraction gap so humans can write logical code instead of manual assembly.</li>
+              <li><b>Portability</b> — Separates source syntax from concrete CPU platforms by generating custom binaries for diverse targets.</li>
+              <li><b>Optimization</b> — Optimizes operations globally (reducing register spills, memory latency, and instruction sizes).</li>
+            </ul>
+            <h4 style="font-size: 13px; font-weight: 600; margin: 12px 0 6px;">Compiler vs. Interpreter:</h4>
+            <table class="notes-table">
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Compiler</th>
+                  <th>Interpreter</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>Execution Speed</b></td>
+                  <td>Faster (pre-compiled to target machine instructions).</td>
+                  <td>Slower (translated line-by-line during runtime).</td>
+                </tr>
+                <tr>
+                  <td><b>Output File</b></td>
+                  <td>Generates standalone intermediate target object/executable code.</td>
+                  <td>No intermediate output; translates code on-the-fly.</td>
+                </tr>
+                <tr>
+                  <td><b>Memory Usage</b></td>
+                  <td>Higher (requires storing whole code representation and output).</td>
+                  <td>Lower (only stores instructions currently executing).</td>
+                </tr>
+                <tr>
+                  <td><b>Error Detection</b></td>
+                  <td>Scans the entire source code and reports errors at the end.</td>
+                  <td>Stops execution at the very first error encountered.</td>
+                </tr>
+                <tr>
+                  <td><b>Examples</b></td>
+                  <td>C, C++, Rust, Go, Swift, Haskell</td>
+                  <td>Python, JavaScript, Ruby, PHP, Perl</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- TOPIC 2: TYPES OF COMPILER -->
+          <div class="topic">
+            <div class="topic-title">Types of Compilers</div>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              Compilers are engineered in different ways depending on compile-speed requirements, memory constraints, and target architectures:
+            </p>
+            <table class="notes-table">
+              <thead>
+                <tr>
+                  <th>Compiler Type</th>
+                  <th>Definition &amp; Core Concept</th>
+                  <th>Key Feature / Application</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>Single-Pass</b></td>
+                  <td>Scans source code exactly once. Parses and emits code concurrently.</td>
+                  <td>Extremely fast compiler speed; minimal global optimization.</td>
+                </tr>
+                <tr>
+                  <td><b>Multi-Pass</b></td>
+                  <td>Scans code multiple times, building intermediate representations.</td>
+                  <td>Allows extensive optimizations; clean division of phases.</td>
+                </tr>
+                <tr>
+                  <td><b>Cross-Compiler</b></td>
+                  <td>Runs on one architecture (e.g., x86) but generates code for another (ARM).</td>
+                  <td>Critical for developing software on smartphones and embedded hardware.</td>
+                </tr>
+                <tr>
+                  <td><b>Incremental</b></td>
+                  <td>Recompiles only modified subroutines rather than the whole codebase.</td>
+                  <td>Speeds up compilation in massive enterprise projects.</td>
+                </tr>
+                <tr>
+                  <td><b>Just-In-Time (JIT)</b></td>
+                  <td>Compiles intermediate bytecode to machine instructions during execution.</td>
+                  <td>Used in Java Virtual Machines (JVM) and JavaScript V8.</td>
+                </tr>
+                <tr>
+                  <td><b>Bootstrapping</b></td>
+                  <td>A compiler written in the same language it compiles (e.g., C compiler written in C).</td>
+                  <td>Requires compiling the initial compiler using a helper system.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- TOPIC 3: MAJOR DATA STRUCTURES -->
+          <div class="topic">
+            <div class="topic-title">Major Data Structures in Compilers</div>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              To store information and exchange it across phases, compilers use specialized data structures:
+            </p>
+            <table class="notes-table">
+              <thead>
+                <tr>
+                  <th>Data Structure</th>
+                  <th>Definition &amp; Purpose</th>
+                  <th>Implementation Approach</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>Symbol Table</b></td>
+                  <td>Primary registry storing identifier properties (name, scope, type, memory offset).</td>
+                  <td>Hash Tables or Self-Balancing Trees for O(1) or O(log N) operations.</td>
+                </tr>
+                <tr>
+                  <td><b>Abstract Syntax Tree (AST)</b></td>
+                  <td>A compact, hierarchical tree showing program structure, omitting punctuation/keywords.</td>
+                  <td>Tree nodes containing operator types and pointers to operands.</td>
+                </tr>
+                <tr>
+                  <td><b>Parse Tree</b></td>
+                  <td>Graphical representation of grammar derivations; includes all terminal/non-terminals.</td>
+                  <td>Full tree showing 1:1 derivation path (Concrete Syntax Tree).</td>
+                </tr>
+                <tr>
+                  <td><b>Literal Table</b></td>
+                  <td>Registry holding string constants and numeric literals.</td>
+                  <td>Array/Hash of constants to optimize allocation and offset mapping.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- TOPIC 4: FRONT-END & BACK-END / ANALYSIS-SYNTHESIS -->
+          <div class="topic">
+            <div class="topic-title">Front-End vs. Back-End &amp; Analysis-Synthesis Model</div>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              The compilation pipeline is divided into two logical models: <b>Analysis</b> (Front-End) and <b>Synthesis</b> (Back-End).
+            </p>
+            <!-- SVG 2: Front-End & Back-End -->
+            <svg viewBox="0 0 600 220" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin: 16px 0; display: block; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 0;">
+              <defs>
+                <marker id="arrow-as" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)" />
+                </marker>
+              </defs>
+              <rect x="20" y="10" width="560" height="65" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="6" />
+              <text x="40" y="32" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="var(--accent)">FRONT-END (Analysis Phase)</text>
+              <text x="40" y="52" font-family="Inter, sans-serif" font-size="11.5" fill="var(--text-muted)">Reads Source Code • Lexical, Syntax, Semantic Analysis &amp; ICG • Machine-Independent</text>
+              <line x1="300" y1="75" x2="300" y2="120" stroke="var(--accent)" stroke-width="2" fill="none" marker-end="url(#arrow-as)" />
+              <text x="315" y="102" font-family="JetBrains Mono, monospace" font-size="11" font-weight="600" fill="var(--accent)">Intermediate Representation (IR)</text>
+              <rect x="20" y="130" width="560" height="65" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2" rx="6" />
+              <text x="40" y="152" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="var(--accent)">BACK-END (Synthesis Phase)</text>
+              <text x="40" y="172" font-family="Inter, sans-serif" font-size="11.5" fill="var(--text-muted)">Code Optimization &amp; Target Code Generation • Machine-Dependent (Assembly/Binary)</text>
+            </svg>
+            <table class="notes-table">
+              <thead>
+                <tr>
+                  <th>Aspect</th>
+                  <th>Front-End (Analysis)</th>
+                  <th>Back-End (Synthesis)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>Focus</b></td>
+                  <td>Source code structure, spelling, type matching, scope.</td>
+                  <td>Instruction selection, CPU register layout, performance optimization.</td>
+                </tr>
+                <tr>
+                  <td><b>Platform Bound</b></td>
+                  <td>Machine-Independent (runs the same on any OS/CPU).</td>
+                  <td>Machine-Dependent (bound to target hardware/register set).</td>
+                </tr>
+                <tr>
+                  <td><b>Inputs &amp; Outputs</b></td>
+                  <td>Source Code -> Intermediate Representation (IR).</td>
+                  <td>Intermediate Representation (IR) -> Target Assembly/Binary.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- TOPIC 5: PHASES OF COMPILER -->
+          <div class="topic">
+            <div class="topic-title">Phases of a Compiler</div>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              A compiler consists of six distinct phases. The Symbol Table and Error Handler connect to all of them.
+            </p>
+            <!-- SVG 3: Compiler Phases Diagram -->
+            <svg viewBox="0 0 620 540" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin: 16px 0; display: block; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 0;">
+              <defs>
+                <marker id="arrow-p" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)" />
+                </marker>
+                <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4">
+                  <circle cx="5" cy="5" r="3" fill="var(--text-muted)" />
+                </marker>
+              </defs>
+              <text x="310" y="25" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="var(--text)" text-anchor="middle">Source Program</text>
+              <line x1="310" y1="32" x2="310" y2="52" stroke="var(--accent)" stroke-width="1.8" fill="none" marker-end="url(#arrow-p)" />
+              <rect x="20" y="60" width="110" height="380" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5" rx="4" />
+              <text x="75" y="250" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle" transform="rotate(-90 75 250)">SYMBOL TABLE</text>
+              <rect x="490" y="60" width="110" height="380" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5" rx="4" />
+              <text x="545" y="250" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle" transform="rotate(90 545 250)">ERROR HANDLER</text>
+              <rect x="170" y="55" width="280" height="42" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="3" />
+              <text x="310" y="81" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="var(--text)" text-anchor="middle">1. Lexical Analysis (Scanner)</text>
+              <line x1="310" y1="97" x2="310" y2="120" stroke="var(--accent)" stroke-width="1.8" fill="none" marker-end="url(#arrow-p)" />
+              <rect x="170" y="120" width="280" height="42" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="3" />
+              <text x="310" y="146" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="var(--text)" text-anchor="middle">2. Syntax Analysis (Parser)</text>
+              <line x1="310" y1="162" x2="310" y2="185" stroke="var(--accent)" stroke-width="1.8" fill="none" marker-end="url(#arrow-p)" />
+              <rect x="170" y="185" width="280" height="42" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="3" />
+              <text x="310" y="211" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="var(--text)" text-anchor="middle">3. Semantic Analysis</text>
+              <line x1="310" y1="227" x2="310" y2="250" stroke="var(--accent)" stroke-width="1.8" fill="none" marker-end="url(#arrow-p)" />
+              <rect x="170" y="250" width="280" height="42" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="3" />
+              <text x="310" y="276" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="var(--text)" text-anchor="middle">4. Intermediate Code Generator</text>
+              <line x1="310" y1="292" x2="310" y2="315" stroke="var(--accent)" stroke-width="1.8" fill="none" marker-end="url(#arrow-p)" />
+              <rect x="170" y="315" width="280" height="42" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="3" />
+              <text x="310" y="341" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="var(--text)" text-anchor="middle">5. Code Optimizer</text>
+              <line x1="310" y1="357" x2="310" y2="380" stroke="var(--accent)" stroke-width="1.8" fill="none" marker-end="url(#arrow-p)" />
+              <rect x="170" y="380" width="280" height="42" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="3" />
+              <text x="310" y="406" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="var(--text)" text-anchor="middle">6. Code Generator</text>
+              <line x1="310" y1="422" x2="310" y2="442" stroke="var(--accent)" stroke-width="1.8" fill="none" marker-end="url(#arrow-p)" />
+              <text x="310" y="492" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="var(--text)" text-anchor="middle">Target Program</text>
+              <line x1="130" y1="76" x2="170" y2="76" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+              <line x1="130" y1="141" x2="170" y2="141" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+              <line x1="130" y1="206" x2="170" y2="206" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+              <line x1="130" y1="271" x2="170" y2="271" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+              <line x1="130" y1="336" x2="170" y2="336" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+              <line x1="130" y1="401" x2="170" y2="401" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+              <line x1="450" y1="76" x2="490" y2="76" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+              <line x1="450" y1="141" x2="490" y2="141" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+              <line x1="450" y1="206" x2="490" y2="206" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+              <line x1="450" y1="271" x2="490" y2="271" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+              <line x1="450" y1="336" x2="490" y2="336" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+              <line x1="450" y1="401" x2="490" y2="401" stroke="var(--text-muted)" stroke-width="1.2" fill="none" marker-start="url(#dot)" marker-end="url(#dot)" />
+            </svg>
+            
+            <h4 style="font-size: 13px; font-weight: 600; margin: 16px 0 6px;">Step-by-Step Walkthrough: Compiling <code>position = initial + rate * 60</code></h4>
+            <ol style="font-size: 14px; line-height: 1.6; margin: 0 0 16px 20px;">
+              <li style="margin-bottom: 8px;">
+                <b>Lexical Analysis (Scanner):</b> Reads character input and emits tokens. Assigns identifiers to entries in the Symbol Table.
+                <br>Token stream: <code>&lt;id, 1&gt; &lt;=&gt; &lt;id, 2&gt; &lt;+&gt; &lt;id, 3&gt; &lt;*&gt; &lt;num, 60&gt;</code>
+              </li>
+              <li style="margin-bottom: 8px;">
+                <b>Syntax Analysis (Parser):</b> Imposes grammar rules. Groups tokens into a hierarchical structure because multiplication has higher precedence than addition.
+                <pre class="notes-code-block">= (assignment)
+ ├── id1 (position)
+ └── + (addition)
+      ├── id2 (initial)
+      └── * (multiplication)
+           ├── id3 (rate)
+           └── num (60)</pre>
+              </li>
+              <li style="margin-bottom: 8px;">
+                <b>Semantic Analysis:</b> Verifies semantic consistency. If <code>id3</code> (rate) is a float, the compiler must convert the integer <code>60</code> to float.
+                <br>Output: Parse tree with integer <code>60</code> explicitly cast to <code>inttofloat(60)</code>.
+              </li>
+              <li style="margin-bottom: 8px;">
+                <b>Intermediate Code Generation:</b> Generates three-address code (TAC) instructions:
+                <pre class="notes-code-block">t1 = inttofloat(60)
+t2 = id3 * t1
+t3 = id2 + t2
+id1 = t3</pre>
+              </li>
+              <li style="margin-bottom: 8px;">
+                <b>Code Optimization:</b> Constant folds <code>inttofloat(60)</code> into a float constant <code>60.0</code> directly at compile time:
+                <pre class="notes-code-block">t1 = id3 * 60.0
+id1 = id2 + t1</pre>
+              </li>
+              <li style="margin-bottom: 8px;">
+                <b>Target Code Generation:</b> Maps operands to CPU registers and generates assembly:
+                <pre class="notes-code-block">LDF R2, id3         ; Load rate into float register R2
+MULF R2, R2, #60.0   ; R2 = R2 * 60.0
+LDF R1, id2         ; Load initial into float register R1
+ADDF R1, R1, R2      ; R1 = R1 + R2
+STF id1, R1         ; Store result to position</pre>
+              </li>
+            </ol>
+          </div>
+
+          <!-- TOPIC 6: LEXICAL ANALYSIS KEY TERMS -->
+          <div class="topic">
+            <div class="topic-title">Lexical Analysis: Tokens, Patterns, and Lexemes</div>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              The first phase of the compiler reads the input character-by-character and classifies text segments:
+            </p>
+            <!-- SVG 4: Lexical Analyzer Workflow Diagram -->
+            <svg viewBox="0 0 600 160" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin: 16px 0; display: block; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 0;">
+              <defs>
+                <marker id="arrow-law" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)" />
+                </marker>
+              </defs>
+              <rect x="20" y="45" width="110" height="70" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="4" />
+              <text x="75" y="85" font-family="Inter, sans-serif" font-size="12" fill="var(--text)" text-anchor="middle">Source Program</text>
+              <line x1="130" y1="80" x2="190" y2="80" stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#arrow-law)" />
+              <text x="160" y="70" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Characters</text>
+              <rect x="195" y="45" width="140" height="70" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2" rx="4" />
+              <text x="265" y="76" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle">LEXICAL</text>
+              <text x="265" y="93" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle">ANALYZER</text>
+              <line x1="335" y1="65" x2="440" y2="65" stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#arrow-law)" />
+              <text x="387" y="55" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Token Stream</text>
+              <line x1="440" y1="95" x2="335" y2="95" stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#arrow-law)" />
+              <text x="387" y="112" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">getNextToken()</text>
+              <rect x="450" y="45" width="130" height="70" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="4" />
+              <text x="515" y="76" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="var(--text)" text-anchor="middle">Syntax Analyzer</text>
+              <text x="515" y="93" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">(Parser)</text>
+            </svg>
+            <table class="notes-table">
+              <thead>
+                <tr>
+                  <th>Concept</th>
+                  <th>Definition</th>
+                  <th>Example Case</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>Token</b></td>
+                  <td>Abstract category representing syntactic terminal symbols.</td>
+                  <td><code>id</code> (identifier), <code>num</code>, <code>keyword</code>, <code>relation</code></td>
+                </tr>
+                <tr>
+                  <td><b>Pattern</b></td>
+                  <td>The regular expression rule describing strings belonging to a token.</td>
+                  <td><code>[a-zA-Z_][a-zA-Z0-9_]*</code></td>
+                </tr>
+                <tr>
+                  <td><b>Lexeme</b></td>
+                  <td>Concrete string sequence matched by a pattern in the source.</td>
+                  <td><code>position</code>, <code>rate</code>, <code>60</code>, <code>if</code></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4 style="font-size: 13px; font-weight: 600; margin: 16px 0 6px;">Lexical Errors vs. Syntax Errors:</h4>
+            <table class="notes-table">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Lexical Error</th>
+                  <th>Syntax Error</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>Detection Phase</b></td>
+                  <td>Lexical Analyzer (Scanner).</td>
+                  <td>Syntax Analyzer (Parser).</td>
+                </tr>
+                <tr>
+                  <td><b>Cause</b></td>
+                  <td>Illegal characters or bad token spelling.</td>
+                  <td>Valid tokens placed in structurally invalid combinations.</td>
+                </tr>
+                <tr>
+                  <td><b>Example</b></td>
+                  <td><code>int x = 10#2;</code> (<code>#</code> is not a valid operator).</td>
+                  <td><code>int x = * 5;</code> (illegal operator placement).</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <h4 style="font-size: 13px; font-weight: 600; margin: 12px 0 6px;">Lexical Error Recovery Strategies:</h4>
             <ul class="qlist">
-              <li><b>Compiler</b> — translates entire source to target before execution. Faster at runtime, higher memory usage.</li>
-              <li><b>Interpreter</b> — translates and executes line by line. Slower but easier to debug.</li>
-              <li><b>Assembler</b> — converts assembly language to machine code (1-to-1 mapping).</li>
+              <li><b>Panic Mode Recovery</b> — Deletes successive invalid characters until the scanner reaches a recognizable token boundary.</li>
+              <li><b>Character Modifications</b> — Tries to insert a missing character, delete a redundant character, transpose adjacent characters, or substitute an invalid character to fix spelling.</li>
             </ul>
           </div>
+
+          <!-- TOPIC 7: INPUT BUFFERING -->
           <div class="topic">
-            <div class="topic-title">Phases of a Compiler (must memorise)</div>
+            <div class="topic-title">Input Buffering: Two-Buffer Scheme &amp; Sentinels</div>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              Because filesystem disk reads are slow, reading one character at a time directly from disk blocks compiler performance. The compiler uses a buffer memory scheme:
+            </p>
+            <!-- SVG 5: Input Buffering Pointer Locations -->
+            <svg viewBox="0 0 600 180" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin: 16px 0; display: block; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 0;">
+              <rect x="20" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="33.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">i</text>
+              <rect x="47" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="60.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">n</text>
+              <rect x="74" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="87.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">i</text>
+              <rect x="101" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="114.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">t</text>
+              <rect x="128" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="141.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">i</text>
+              <rect x="155" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="168.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">a</text>
+              <rect x="182" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="195.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">l</text>
+              <rect x="209" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="222.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle"> </text>
+              <rect x="236" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="249.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">+</text>
+              <rect x="263" y="40" width="27" height="36" fill="var(--code-bg)" stroke="var(--accent)" stroke-width="1.2" /><text x="276.5" y="62" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="var(--accent)" text-anchor="middle">EOF</text>
+              <text x="150" y="93" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Buffer 1 (Size N)</text>
+              <rect x="310" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="323.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle"> </text>
+              <rect x="337" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="350.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">r</text>
+              <rect x="364" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="377.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">a</text>
+              <rect x="391" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="404.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">t</text>
+              <rect x="418" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="431.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">e</text>
+              <rect x="445" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="458.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle"> </text>
+              <rect x="472" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="485.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle">*</text>
+              <rect x="499" y="40" width="27" height="36" fill="var(--bg)" stroke="var(--border)" stroke-width="1.2" /><text x="512.5" y="62" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--text)" text-anchor="middle"> </text>
+              <rect x="526" y="40" width="27" height="36" fill="var(--code-bg)" stroke="var(--accent)" stroke-width="1.2" /><text x="539.5" y="62" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="var(--accent)" text-anchor="middle">EOF</text>
+              <text x="438" y="93" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Buffer 2 (Size N)</text>
+              <line x1="20" y1="40" x2="20" y2="120" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="2" />
+              <circle cx="20" cy="40" r="3" fill="var(--accent)" />
+              <text x="20" y="135" font-family="JetBrains Mono, monospace" font-size="11" fill="var(--accent)">lexemeBegin</text>
+              <line x1="404" y1="40" x2="404" y2="120" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="2" />
+              <circle cx="404" cy="40" r="3" fill="var(--accent)" />
+              <text x="404" y="135" font-family="JetBrains Mono, monospace" font-size="11" fill="var(--accent)">forward</text>
+            </svg>
+            <h4 style="font-size: 13px; font-weight: 600; margin: 12px 0 6px;">How It Works:</h4>
+            <ul class="qlist" style="margin-bottom: 16px;">
+              <li>Two buffers, each of size $N$ (typically $4$ KB), are allocated in memory.</li>
+              <li><b>lexemeBegin Pointer</b> marks the start of the current candidate lexeme.</li>
+              <li><b>forward Pointer</b> scans forward to inspect characters. When it hits the end of Buffer 1, Buffer 2 is reloaded with fresh input, and the pointer wraps around.</li>
+            </ul>
+            <h4 style="font-size: 13px; font-weight: 600; margin: 12px 0 6px;">Sentinel Optimization:</h4>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              Normally, scanning a character requires testing two conditions: (1) did we hit the end of the buffer? and (2) what is the character?
+              To eliminate the boundary test on every single character, we place an <code>EOF</code> sentinel character at the end of each buffer. The boundary reload check is only executed when an <code>EOF</code> is encountered:
+            </p>
+            <pre class="notes-code-block">char c = *forward++;
+if (c == EOF) {
+    if (reached_end_of_buffer1()) {
+        reload_buffer2();
+        forward = start_of_buffer2;
+    } else if (reached_end_of_buffer2()) {
+        reload_buffer1();
+        forward = start_of_buffer1;
+    } else {
+        // True End-of-File reached
+        terminate_scan();
+    }
+} else {
+    process_char(c);
+}</pre>
+          </div>
+
+          <!-- TOPIC 8: SPECIFICATION OF TOKENS -->
+          <div class="topic">
+            <div class="topic-title">Specification of Tokens (Regular Expressions)</div>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              Tokens are mathematically specified using formal regular expressions.
+            </p>
+            <h4 style="font-size: 13px; font-weight: 600; margin: 12px 0 6px;">Languages Operations:</h4>
+            <ul class="qlist" style="margin-bottom: 16px;">
+              <li><b>Union ($L \cup D$)</b> — Strings in $L$ or $D$: <code>{s | s ∈ L or s ∈ D}</code></li>
+              <li><b>Concatenation ($LD$)</b> — Paring strings from $L$ and $D$: <code>{xy | x ∈ L and y ∈ D}</code></li>
+              <li><b>Kleene Closure ($L^*$)</b> — Zero or more occurrences of language $L$: <code>L* = ∪ L^i</code> (includes ε)</li>
+              <li><b>Positive Closure ($L^+$)</b> — One or more occurrences of language $L$: <code>L+ = L L*</code> (excludes ε)</li>
+            </ul>
+            <h4 style="font-size: 13px; font-weight: 600; margin: 12px 0 6px;">Regular Definitions:</h4>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              Names representing complex regex patterns:
+            </p>
+            <pre class="notes-code-block">letter_     → [A-Za-z_]
+digit       → [0-9]
+identifier  → letter_ ( letter_ | digit )*
+digits      → digit+
+number      → digits ( . digits )? ( [eE] [+-]? digits )?</pre>
+          </div>
+
+          <!-- TOPIC 9: RECOGNITION OF TOKENS -->
+          <div class="topic">
+            <div class="topic-title">Recognition of Tokens &amp; State Diagrams</div>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              Regular expressions are compiled into transition state diagrams which are executed as Finite Automata.
+            </p>
+            <!-- SVG 6: Transition Diagram for Identifiers -->
+            <svg viewBox="0 0 600 160" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin: 16px 0; display: block; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 0;">
+              <defs>
+                <marker id="arrow-tok" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--text-muted)" />
+                </marker>
+              </defs>
+              <line x1="20" y1="80" x2="50" y2="80" stroke="var(--text-muted)" stroke-width="1.5" fill="none" marker-end="url(#arrow-tok)" />
+              <text x="35" y="70" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Start</text>
+              <circle cx="80" cy="80" r="28" fill="var(--bg)" stroke="var(--text)" stroke-width="1.5" />
+              <text x="80" y="84" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="var(--text)" text-anchor="middle">0</text>
+              <line x1="108" y1="80" x2="232" y2="80" stroke="var(--text-muted)" stroke-width="1.5" fill="none" marker-end="url(#arrow-tok)" />
+              <text x="170" y="70" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">letter_ or _</text>
+              <circle cx="260" cy="80" r="28" fill="var(--bg)" stroke="var(--text)" stroke-width="1.5" />
+              <text x="260" y="84" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="var(--text)" text-anchor="middle">1</text>
+              <path d="M 248 54 C 238 20, 282 20, 272 54" stroke="var(--text-muted)" stroke-width="1.5" fill="none" marker-end="url(#arrow-tok)" />
+              <text x="260" y="15" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">letter_, _, or digit</text>
+              <line x1="288" y1="80" x2="432" y2="80" stroke="var(--text-muted)" stroke-width="1.5" fill="none" marker-end="url(#arrow-tok)" />
+              <text x="360" y="70" font-family="Inter, sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">other character</text>
+              <circle cx="468" cy="80" r="28" fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5" />
+              <circle cx="468" cy="80" r="23" fill="none" stroke="var(--accent)" stroke-width="1.5" />
+              <text x="468" y="84" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="var(--accent)" text-anchor="middle">2*</text>
+              <rect x="420" y="123" width="100" height="24" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="0.7" rx="3" />
+              <text x="470" y="138" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="var(--accent)" text-anchor="middle">Retract 1 char</text>
+            </svg>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              Accepting states with a star <code>*</code> signify lookahead retraction, meaning the scanner read one character too far to verify token boundaries (e.g., matching the space after an identifier) and must move the <code>forward</code> pointer back by one position.
+            </p>
+          </div>
+
+          <!-- TOPIC 10: DESIGN OF LEXICAL GENERATORS -->
+          <div class="topic">
+            <div class="topic-title">LEX Tool Architecture &amp; Execution</div>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+              <b>LEX</b> is a compiler utility that converts lexical specifications (regular expressions with action C-code) into C scanner source.
+            </p>
+            <!-- SVG 7: LEX Tool Architecture -->
+            <svg viewBox="0 0 600 240" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin: 16px 0; display: block; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 0;">
+              <defs>
+                <marker id="arrow-lex" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)" />
+                </marker>
+              </defs>
+              <rect x="20" y="25" width="110" height="60" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="4" />
+              <text x="75" y="52" font-family="Inter, sans-serif" font-size="12" fill="var(--text)" text-anchor="middle">LEX Source file</text>
+              <text x="75" y="70" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-muted)" text-anchor="middle">lexer.l</text>
+              <line x1="130" y1="55" x2="185" y2="55" stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#arrow-lex)" />
+              <rect x="195" y="25" width="110" height="60" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2" rx="4" />
+              <text x="250" y="59" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle">LEX Compiler</text>
+              <line x1="305" y1="55" x2="360" y2="55" stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#arrow-lex)" />
+              <rect x="370" y="25" width="110" height="60" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5" rx="4" />
+              <text x="425" y="52" font-family="Inter, sans-serif" font-size="12" fill="var(--text)" text-anchor="middle">C Lexer source</text>
+              <text x="425" y="70" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-muted)" text-anchor="middle">lex.yy.c</text>
+              <line x1="425" y1="85" x2="425" y2="135" stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#arrow-lex)" />
+              <text x="475" y="115" font-family="Inter, sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">gcc compiler</text>
+              <rect x="365" y="145" width="120" height="60" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2" rx="4" />
+              <text x="425" y="179" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="var(--accent)" text-anchor="middle">Executable Scanner</text>
+              <line x1="280" y1="175" x2="355" y2="175" stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#arrow-lex)" />
+              <text x="315" y="165" font-family="Inter, sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">Input Stream</text>
+              <line x1="485" y1="175" x2="560" y2="175" stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#arrow-lex)" />
+              <text x="522" y="165" font-family="Inter, sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">Tokens</text>
+            </svg>
+            
+            <h4 style="font-size: 13px; font-weight: 600; margin: 16px 0 6px;">Structure of a LEX file (<code>.l</code>):</h4>
+            <pre class="notes-code-block">%{
+/* 1. Declarations: imports, variables, header files */
+#include &lt;stdio.h&gt;
+%}
+digit   [0-9]
+%%
+/* 2. Rules: pattern { C Action Code } */
+"if"            { printf("Keyword: IF\n"); }
+{digit}+        { printf("Num: %s\n", yytext); }
+[ \t\n]+        { /* ignore whitespace */ }
+%%
+/* 3. User Subroutines: C functions */
+int yywrap() { return 1; }
+int main() { yylex(); return 0; }</pre>
+
+            <h4 style="font-size: 13px; font-weight: 600; margin: 16px 0 6px;">Key Global Interfaces in LEX:</h4>
             <ul class="qlist">
-              <li><b>1. Lexical Analysis</b> — reads source, produces tokens, removes whitespace/comments.</li>
-              <li><b>2. Syntax Analysis</b> — builds parse tree using grammar rules (CFG).</li>
-              <li><b>3. Semantic Analysis</b> — type checking, scope resolution, attribute evaluation.</li>
-              <li><b>4. Intermediate Code Generation</b> — produces 3AC / TAC / quadruples.</li>
-              <li><b>5. Code Optimisation</b> — improves intermediate code (speed/size).</li>
-              <li><b>6. Code Generation</b> — produces target machine code / assembly.</li>
+              <li><b><code>yylex()</code></b> — Core scanning function generated by LEX. When executed, starts reading input.</li>
+              <li><b><code>yytext</code></b> — Character array containing the current string matching the regular expression rules.</li>
+              <li><b><code>yyleng</code></b> — Length of the current matched lexeme.</li>
+              <li><b><code>yyin</code></b> — File pointer representing input source. Defaults to <code>stdin</code>.</li>
+              <li><b><code>yywrap()</code></b> — Executed when EOF is reached. Returns 1 to terminate; returns 0 to switch files.</li>
+            </ul>
+
+            <h4 style="font-size: 13px; font-weight: 600; margin: 16px 0 6px;">Rule Matching Priority Resolution:</h4>
+            <ol style="font-size: 14px; line-height: 1.6; margin: 0 0 16px 20px;">
+              <li><b>Longest Match Rule:</b> Prefers the pattern that consumes the largest number of characters. (e.g. matching <code>then</code> as an identifier instead of keyword <code>the</code> followed by <code>n</code>).</li>
+              <li><b>First Pattern Rule:</b> If lexeme lengths are equal, prefers the pattern specified highest in the <code>.l</code> file rules. (e.g. mapping <code>if</code> as a keyword rather than identifier because the keyword rule is defined first).</li>
+            </ol>
+          </div>
+
+          <!-- EXAM FOCUS CALLOUTS -->
+          <div class="notes-box exam">
+            <div class="notes-box-title exam">Exam Focus &amp; Important Theory (10 Marks)</div>
+            <ul class="qlist">
+              <li class="repeat"><b>Phases Tracing</b> — Practice tracing statements like <code>a = b + c * 50</code> showing all intermediate tokens, trees, and TAC.</li>
+              <li><b>Differentiate Lexical vs Syntax Errors</b> — Know recovery strategies (panic mode, deletion, character transposition) for 5-mark theory answers.</li>
+              <li><b>Sentinel Buffer Diagram</b> — Draw the dual buffer sliding windows with boundary EOFs to capture sentinel advantages in speed checks.</li>
             </ul>
           </div>
-          <div class="topic">
-            <div class="topic-title">Lexical Analysis key terms</div>
-            <ul class="qlist">
-              <li><b>Token</b> — &lt;token-class, attribute&gt; pair. e.g. &lt;id, "x"&gt;, &lt;op, "+"&gt;</li>
-              <li><b>Lexeme</b> — actual character sequence in source that matches a pattern.</li>
-              <li><b>Pattern</b> — rule (regex) describing a token class.</li>
-              <li><b>Input Buffering</b> — two-buffer scheme to handle lookahead efficiently; each buffer ~4KB.</li>
-              <li><b>Sentinels</b> — EOF marker placed at end of each buffer to avoid boundary checks.</li>
-            </ul>
+
+          <!-- INTERVIEW PREP CALLOUTS -->
+          <div class="notes-box interview">
+            <div class="notes-box-title interview">Interview Q&amp;A Prep</div>
+            <p style="font-size: 13.5px; line-height: 1.5; margin: 0 0 10px;">
+              <b>Q: Why does the compiler use an Intermediate Representation (IR) instead of writing direct machine assembly translation?</b>
+              <br><span style="color: var(--text-muted);">A: Decouples frontend syntax checking from backend hardware details. If you support M languages and N hardware architectures, IR reduces required systems from M × N compilers to M frontends + N backends (M + N systems). Also enables machine-neutral optimizations to be shared.</span>
+            </p>
+            <p style="font-size: 13.5px; line-height: 1.5; margin: 0;">
+              <b>Q: What is the difference between a Lexeme, a Token, and a Pattern?</b>
+              <br><span style="color: var(--text-muted);">A: A token is an abstract class representing grammatical terminals (e.g., <code>id</code>). A pattern is the regex describing valid structures. A lexeme is the actual character sequence in the source matching that pattern (e.g., <code>val1</code>).</span>
+            </p>
           </div>
+
+          <!-- ONE-PAGE QUICK REVISION SHEET -->
           <div class="topic">
-            <div class="topic-title">LEX tool</div>
-            <ul class="qlist">
-              <li>LEX takes a <code>.l</code> file with regex rules and generates a C lexer.</li>
-              <li>Structure: <b>definitions</b> | <b>rules</b> (pattern → action) | <b>user code</b>.</li>
-              <li>Internally builds a DFA from the combined NFA of all patterns.</li>
+            <div class="topic-title">Unit 1 — One-Page Quick Revision Sheet</div>
+            
+            <h4 style="font-size: 13px; font-weight: 600; margin: 12px 0 6px;">Regex Identities Reference:</h4>
+            <ul class="qlist" style="margin-bottom: 16px;">
+              <li>Commutative: <code>r | s = s | r</code></li>
+              <li>Associative: <code>r | (s | t) = (r | s) | t</code></li>
+              <li>Distributive: <code>r(s | t) = rs | rt</code> and <code>(s | t)r = sr | tr</code></li>
+              <li>Closure: <code>(r*)* = r*</code> and <code>r+ = r r*</code></li>
             </ul>
+
+            <h4 style="font-size: 13px; font-weight: 600; margin: 12px 0 6px;">Compiler Phases Summary:</h4>
+            <table class="notes-table">
+              <thead>
+                <tr>
+                  <th>Phase</th>
+                  <th>Inputs</th>
+                  <th>Outputs</th>
+                  <th>Key Actions &amp; Tasks</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>Lexical</b></td>
+                  <td>Characters</td>
+                  <td>Tokens</td>
+                  <td>Groups input characters, removes comments.</td>
+                </tr>
+                <tr>
+                  <td><b>Syntax</b></td>
+                  <td>Tokens</td>
+                  <td>Parse Tree / AST</td>
+                  <td>Checks grammatical hierarchy (CFG).</td>
+                </tr>
+                <tr>
+                  <td><b>Semantic</b></td>
+                  <td>AST</td>
+                  <td>Decorated AST</td>
+                  <td>Checks type safety and scope validity.</td>
+                </tr>
+                <tr>
+                  <td><b>ICG</b></td>
+                  <td>Decorated AST</td>
+                  <td>3-Address Code (TAC)</td>
+                  <td>Flattens logic into simple 3-operand statements.</td>
+                </tr>
+                <tr>
+                  <td><b>Optimizer</b></td>
+                  <td>3-Address Code</td>
+                  <td>Optimized 3AC</td>
+                  <td>Reduces loop costs and folding constants.</td>
+                </tr>
+                <tr>
+                  <td><b>Code Gen</b></td>
+                  <td>Optimized 3AC</td>
+                  <td>Target Assembly</td>
+                  <td>Assigns registers, schedules instructions.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div class="takeaway"><b>Exam tip:</b> Always draw the 6-phase pipeline diagram and trace an expression like <code>a := b + c * 4</code> through each phase — this appears almost every year.</div>
+
           <div class="pager" id="pager-notes-unit1"></div>
         </section>
 
