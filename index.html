@@ -2394,58 +2394,290 @@ int main() { yylex(); return 0; }</pre>
         <section class="page" data-id="notes-unit2">
           <div class="unit-eyebrow">Unit 2 — Notes</div>
           <h2 class="unit-title">Syntax Analysis &amp; SDT</h2>
-          <p class="unit-intro">The heaviest unit. Master CFG, First/Follow, parsing tables, and attribute grammars.</p>
+          <p class="unit-intro">The heaviest unit (~35% exam weight). Covers CFG, grammar transformations, FIRST/FOLLOW, LL(1), LR/SLR/LALR parsers, and Syntax Directed Translation.</p>
           <div class="stat-row">
-            <div class="stat"><div class="stat-val">10</div><div class="stat-label">key topics to know</div></div>
+            <div class="stat"><div class="stat-val">10</div><div class="stat-label">key topics</div></div>
             <div class="stat"><div class="stat-val">~35%</div><div class="stat-label">exam weight</div></div>
-            <div class="stat"><div class="stat-val">★★★</div><div class="stat-label">difficulty level</div></div>
+            <div class="stat"><div class="stat-val">★★★</div><div class="stat-label">difficulty</div></div>
           </div>
+
+          <!-- TOPIC 1: CFG -->
           <div class="topic">
             <div class="topic-title">Context-Free Grammar (CFG)</div>
-            <ul class="qlist">
-              <li>G = (V, T, P, S) — variables, terminals, productions, start symbol.</li>
-              <li><b>Ambiguous grammar</b> — a string has more than one parse tree. Fix by adding precedence/associativity rules.</li>
-              <li><b>Left recursion</b> — A → Aα | β. Eliminate: A → βA', A' → αA' | ε</li>
-              <li><b>Left factoring</b> — A → αβ | αγ becomes A → αA', A' → β | γ</li>
-            </ul>
+            <p style="font-size:14px;line-height:1.6;margin-bottom:12px;">
+              A <b>CFG</b> is a 4-tuple <b>G = (V, T, P, S)</b> where V = non-terminals, T = terminals, P = productions (A → α), S = start symbol. Every valid program is a sentence of L(G).
+            </p>
+            <!-- SVG: CFG components diagram -->
+            <svg viewBox="0 0 620 130" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);padding:8px 0;">
+              <defs>
+                <marker id="a2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)"/>
+                </marker>
+              </defs>
+              <rect x="10" y="30" width="120" height="70" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="70" y="58" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="middle">V</text>
+              <text x="70" y="76" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Non-terminals</text>
+              <text x="70" y="90" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">E, T, F, S</text>
+              <rect x="150" y="30" width="120" height="70" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="210" y="58" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--text)" text-anchor="middle">T</text>
+              <text x="210" y="76" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Terminals</text>
+              <text x="210" y="90" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">id, +, *, (, )</text>
+              <rect x="290" y="30" width="150" height="70" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="365" y="58" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--text)" text-anchor="middle">P</text>
+              <text x="365" y="76" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Productions</text>
+              <text x="365" y="90" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">E → E+T | T</text>
+              <rect x="460" y="30" width="140" height="70" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="530" y="58" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="middle">S</text>
+              <text x="530" y="76" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Start Symbol</text>
+              <text x="530" y="90" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">Top-level NT</text>
+              <text x="310" y="20" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--accent)" text-anchor="middle">G = ( V ,  T ,  P ,  S )</text>
+            </svg>
+            <h4 style="font-size:13px;font-weight:600;margin:12px 0 6px;">Grammar Transformations (required before LL parsing):</h4>
+            <table class="notes-table">
+              <thead><tr><th>Problem</th><th>What It Is</th><th>Fix</th><th>Example</th></tr></thead>
+              <tbody>
+                <tr><td><b>Left Recursion</b></td><td>A → Aα (causes infinite loop in top-down)</td><td>A → βA' &nbsp; A' → αA' | ε</td><td>E → E+T | T &nbsp;→&nbsp; E → TE', E' → +TE'|ε</td></tr>
+                <tr><td><b>Left Factoring</b></td><td>A → αβ | αγ (parser can't choose)</td><td>A → αA' &nbsp; A' → β | γ</td><td>A → abD | abE &nbsp;→&nbsp; A → abA', A' → D|E</td></tr>
+                <tr><td><b>Ambiguity</b></td><td>String has 2+ parse trees</td><td>Rewrite with precedence levels</td><td>E→E+E|E*E|id &nbsp;→&nbsp; use E,T,F hierarchy</td></tr>
+              </tbody>
+            </table>
           </div>
+
+          <!-- TOPIC 2: PARSE TREE & DERIVATIONS -->
           <div class="topic">
-            <div class="topic-title">FIRST and FOLLOW</div>
-            <ul class="qlist">
-              <li><b>FIRST(α)</b> — set of terminals that begin strings derivable from α. If α ⇒* ε, add ε.</li>
-              <li><b>FOLLOW(A)</b> — terminals that can appear immediately after A in some sentential form. $ ∈ FOLLOW(S).</li>
-              <li>Used to build LL(1) and SLR parsing tables.</li>
-            </ul>
+            <div class="topic-title">Parse Tree &amp; Derivations</div>
+            <p style="font-size:14px;line-height:1.6;margin-bottom:12px;">
+              A <b>Parse Tree</b> shows the derivation graphically. Root = Start Symbol, internal nodes = Non-terminals, leaves = Terminals. The frontier (leaves L→R) = the input string.
+            </p>
+            <!-- SVG: Parse Tree for id+id*id -->
+            <svg viewBox="0 0 500 220" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);">
+              <defs>
+                <marker id="a3" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                  <path d="M 0 2 L 8 5 L 0 8 z" fill="var(--border)"/>
+                </marker>
+              </defs>
+              <!-- title -->
+              <text x="250" y="18" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--accent)" text-anchor="middle">Parse Tree for: id + id * id</text>
+              <!-- Root E -->
+              <circle cx="250" cy="40" r="14" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="250" y="45" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle">E</text>
+              <!-- E -> E + T -->
+              <line x1="240" y1="54" x2="150" y2="86" stroke="var(--border)" stroke-width="1.5"/>
+              <line x1="250" y1="54" x2="250" y2="86" stroke="var(--border)" stroke-width="1.5"/>
+              <line x1="260" y1="54" x2="355" y2="86" stroke="var(--border)" stroke-width="1.5"/>
+              <!-- left E -->
+              <circle cx="150" cy="100" r="13" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="150" y="105" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--accent)" text-anchor="middle">E</text>
+              <!-- + terminal -->
+              <rect x="237" y="88" width="26" height="24" rx="3" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1"/>
+              <text x="250" y="104" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">+</text>
+              <!-- T -->
+              <circle cx="355" cy="100" r="13" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="355" y="105" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">T</text>
+              <!-- E -> T -->
+              <line x1="150" y1="113" x2="150" y2="140" stroke="var(--border)" stroke-width="1.5"/>
+              <circle cx="150" cy="154" r="13" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="150" y="159" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">T</text>
+              <!-- T -> F -> id -->
+              <line x1="150" y1="167" x2="150" y2="190" stroke="var(--border)" stroke-width="1.5"/>
+              <rect x="130" y="190" width="40" height="22" rx="3" fill="var(--bg)" stroke="var(--accent)" stroke-width="1"/>
+              <text x="150" y="205" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--accent)" text-anchor="middle">id</text>
+              <!-- T -> T * F -->
+              <line x1="345" y1="113" x2="290" y2="145" stroke="var(--border)" stroke-width="1.5"/>
+              <line x1="355" y1="113" x2="355" y2="145" stroke="var(--border)" stroke-width="1.5"/>
+              <line x1="365" y1="113" x2="415" y2="145" stroke="var(--border)" stroke-width="1.5"/>
+              <!-- T child -->
+              <circle cx="290" cy="158" r="13" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="290" y="163" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">T</text>
+              <!-- * -->
+              <rect x="342" y="146" width="26" height="24" rx="3" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1"/>
+              <text x="355" y="162" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">*</text>
+              <!-- F -->
+              <circle cx="415" cy="158" r="13" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="415" y="163" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">F</text>
+              <!-- id leaves -->
+              <line x1="290" y1="171" x2="290" y2="190" stroke="var(--border)" stroke-width="1.5"/>
+              <rect x="270" y="190" width="40" height="22" rx="3" fill="var(--bg)" stroke="var(--accent)" stroke-width="1"/>
+              <text x="290" y="205" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--accent)" text-anchor="middle">id</text>
+              <line x1="415" y1="171" x2="415" y2="190" stroke="var(--border)" stroke-width="1.5"/>
+              <rect x="395" y="190" width="40" height="22" rx="3" fill="var(--bg)" stroke="var(--accent)" stroke-width="1"/>
+              <text x="415" y="205" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--accent)" text-anchor="middle">id</text>
+              <!-- legend -->
+              <circle cx="30" cy="210" r="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="44" y="214" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)">= Non-terminal</text>
+              <rect x="155" y="202" width="20" height="16" rx="2" fill="var(--bg)" stroke="var(--accent)" stroke-width="1"/>
+              <text x="180" y="214" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)">= Terminal (leaf)</text>
+            </svg>
+            <table class="notes-table" style="margin-top:12px;">
+              <thead><tr><th>Derivation Type</th><th>Rule</th><th>Used In</th><th>Key fact</th></tr></thead>
+              <tbody>
+                <tr><td><b>Leftmost</b></td><td>Always expand leftmost NT first</td><td>Top-Down / LL parsers</td><td>Predictive parsing uses this</td></tr>
+                <tr><td><b>Rightmost</b></td><td>Always expand rightmost NT first</td><td>Bottom-Up / LR parsers (reversed)</td><td>LR tracing reads this backwards</td></tr>
+              </tbody>
+            </table>
           </div>
+
+          <!-- TOPIC 3: FIRST & FOLLOW -->
+          <div class="topic">
+            <div class="topic-title">FIRST &amp; FOLLOW Sets</div>
+            <p style="font-size:14px;line-height:1.6;margin-bottom:12px;">Foundation for all parsing tables. Compute these before building any LL(1) or SLR table.</p>
+            <svg viewBox="0 0 580 150" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);">
+              <rect x="20" y="20" width="250" height="110" rx="5" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="145" y="42" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="middle">FIRST(α)</text>
+              <text x="145" y="62" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Terminals that can START</text>
+              <text x="145" y="78" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">strings derived from α</text>
+              <text x="145" y="98" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)" text-anchor="middle">ε ∈ FIRST if α ⇒* ε</text>
+              <text x="145" y="116" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)" text-anchor="middle">FIRST(id+T) = {id}</text>
+              <line x1="290" y1="20" x2="290" y2="130" stroke="var(--border)" stroke-width="1" stroke-dasharray="4"/>
+              <rect x="310" y="20" width="250" height="110" rx="5" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="435" y="42" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--text)" text-anchor="middle">FOLLOW(A)</text>
+              <text x="435" y="62" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Terminals immediately</text>
+              <text x="435" y="78" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">AFTER A in sentential form</text>
+              <text x="435" y="98" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)" text-anchor="middle">$ ∈ FOLLOW(Start). NEVER ε!</text>
+              <text x="435" y="116" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)" text-anchor="middle">FOLLOW(E) = { ), $ }</text>
+            </svg>
+            <ul class="qlist" style="margin-bottom:10px;">
+              <li><b>FIRST rules:</b> FIRST(terminal)={terminal}; if A→ε add ε; for A→X₁X₂…Xk chain through Xi while ε∈FIRST(Xi)</li>
+              <li><b>FOLLOW rules:</b> $ in FOLLOW(S); A→αBβ: add FIRST(β)−{ε}; if ε∈FIRST(β) or B at end: add FOLLOW(A)</li>
+              <li class="repeat">ε is <b>NEVER</b> in FOLLOW. $ is <b>NEVER</b> in FIRST. <span class="tag">exam trap</span></li>
+            </ul>
+            <div class="notes-box exam">
+              <div class="notes-box-title exam">// Worked Example: E→TE', E'→+TE'|ε, T→FT', T'→*FT'|ε, F→(E)|id</div>
+              <table class="notes-table" style="margin-top:8px;">
+                <thead><tr><th>NT</th><th>FIRST</th><th>FOLLOW</th></tr></thead>
+                <tbody>
+                  <tr><td>E</td><td>{ (, id }</td><td>{ ), $ }</td></tr>
+                  <tr><td>E'</td><td>{ +, ε }</td><td>{ ), $ }</td></tr>
+                  <tr><td>T</td><td>{ (, id }</td><td>{ +, ), $ }</td></tr>
+                  <tr><td>T'</td><td>{ *, ε }</td><td>{ +, ), $ }</td></tr>
+                  <tr><td>F</td><td>{ (, id }</td><td>{ *, +, ), $ }</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TOPIC 4: TOP-DOWN vs BOTTOM-UP -->
           <div class="topic">
             <div class="topic-title">Top-Down vs Bottom-Up Parsing</div>
-            <ul class="qlist">
-              <li><b>Top-Down</b> — starts from start symbol, expands toward input. LL(1), recursive descent.</li>
-              <li><b>Bottom-Up</b> — starts from input, reduces to start symbol. LR(0), SLR(1), LALR(1).</li>
-              <li><b>LL(1)</b> — Left-to-right scan, Leftmost derivation, 1 token lookahead. No left recursion allowed.</li>
-            </ul>
+            <svg viewBox="0 0 580 200" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);">
+              <defs>
+                <marker id="arr-td" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)"/></marker>
+                <marker id="arr-bu" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--text-muted)"/></marker>
+              </defs>
+              <text x="145" y="18" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle">TOP-DOWN (LL)</text>
+              <rect x="80" y="26" width="130" height="28" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="145" y="44" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="var(--accent)" text-anchor="middle">Start Symbol (S)</text>
+              <line x1="145" y1="54" x2="145" y2="74" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-td)"/>
+              <rect x="70" y="75" width="150" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="145" y="93" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Predict &amp; Expand NT</text>
+              <line x1="145" y1="103" x2="145" y2="123" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-td)"/>
+              <rect x="70" y="124" width="150" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="145" y="142" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Match Terminals</text>
+              <line x1="145" y1="152" x2="145" y2="172" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-td)"/>
+              <rect x="60" y="173" width="170" height="24" rx="4" fill="var(--accent)" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="145" y="189" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="white" text-anchor="middle">Leaves = Input String ✓</text>
+              <line x1="290" y1="10" x2="290" y2="200" stroke="var(--border)" stroke-width="1" stroke-dasharray="5"/>
+              <text x="435" y="18" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--text-muted)" text-anchor="middle">BOTTOM-UP (LR)</text>
+              <rect x="355" y="173" width="160" height="24" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="435" y="189" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="var(--text)" text-anchor="middle">Input Token Stream</text>
+              <line x1="435" y1="172" x2="435" y2="152" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arr-bu)"/>
+              <rect x="355" y="124" width="160" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="435" y="142" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Shift / Reduce handles</text>
+              <line x1="435" y1="123" x2="435" y2="103" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arr-bu)"/>
+              <rect x="355" y="75" width="160" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="435" y="93" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Stack + ACTION/GOTO</text>
+              <line x1="435" y1="74" x2="435" y2="54" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arr-bu)"/>
+              <rect x="360" y="26" width="150" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="435" y="44" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="var(--text)" text-anchor="middle">Start Symbol (S) ✓</text>
+            </svg>
+            <table class="notes-table">
+              <thead><tr><th>Property</th><th>Top-Down (LL)</th><th>Bottom-Up (LR)</th></tr></thead>
+              <tbody>
+                <tr><td>Direction</td><td>Root → Leaves</td><td>Leaves → Root</td></tr>
+                <tr><td>Derivation</td><td>Leftmost</td><td>Rightmost (reversed)</td></tr>
+                <tr><td>Left recursion</td><td>❌ Infinite loop</td><td>✅ Handles it</td></tr>
+                <tr><td>Power</td><td>Less (LL grammars only)</td><td>More (all LR grammars)</td></tr>
+                <tr><td>Examples</td><td>LL(1), Recursive Descent</td><td>SLR, LALR, CLR</td></tr>
+              </tbody>
+            </table>
           </div>
+
+          <!-- TOPIC 5: LR PARSER HIERARCHY -->
           <div class="topic">
-            <div class="topic-title">SLR / LALR Table Construction</div>
-            <ul class="qlist">
-              <li><b>Step 1</b> — Augment grammar: add S' → S.</li>
-              <li><b>Step 2</b> — Compute LR(0) canonical items (closure + goto).</li>
-              <li><b>Step 3</b> — Build ACTION table: shift on terminal, reduce when dot at end (using FOLLOW for SLR).</li>
-              <li><b>Step 4</b> — Build GOTO table: for non-terminals in each state.</li>
-              <li><b>LALR</b> — merges states with same core items; smaller table than LR(1), same power as SLR for most grammars.</li>
-            </ul>
+            <div class="topic-title">LR Parser Power Hierarchy</div>
+            <svg viewBox="0 0 500 195" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);">
+              <ellipse cx="250" cy="100" rx="230" ry="85" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="5"/>
+              <text x="460" y="48" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)">CLR(1)</text>
+              <ellipse cx="250" cy="100" rx="175" ry="65" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="5"/>
+              <text x="412" y="68" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)">LALR(1)</text>
+              <ellipse cx="250" cy="100" rx="120" ry="45" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="5"/>
+              <text x="362" y="88" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)">SLR(1)</text>
+              <ellipse cx="250" cy="100" rx="65" ry="26" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+              <text x="250" y="105" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle">LR(0)</text>
+              <text x="250" y="183" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">LR(0) ⊂ SLR(1) ⊂ LALR(1) ⊂ CLR(1) — outer = more grammars handled</text>
+            </svg>
+            <table class="notes-table">
+              <thead><tr><th>Parser</th><th>Lookahead</th><th>Table size</th><th>Used in</th></tr></thead>
+              <tbody>
+                <tr><td><b>LR(0)</b></td><td>None</td><td>Small</td><td>Theory only</td></tr>
+                <tr><td><b>SLR(1)</b></td><td>FOLLOW(A)</td><td>Small</td><td>Rarely</td></tr>
+                <tr><td><b>LALR(1)</b></td><td>Merged CLR lookaheads</td><td>Small</td><td><b>yacc / bison ← industry standard</b></td></tr>
+                <tr><td><b>CLR(1)</b></td><td>Exact per-item</td><td>Large</td><td>Reference only</td></tr>
+              </tbody>
+            </table>
+            <div class="notes-box tip" style="margin-top:12px;">
+              <div class="notes-box-title tip">// SLR Table Construction — Step by Step</div>
+              <ul class="qlist">
+                <li><b>1.</b> Augment: add S' → S</li>
+                <li><b>2.</b> I0 = CLOSURE({S'→.S}), then GOTO(Ii, X) for every symbol X</li>
+                <li><b>3.</b> ACTION: [A→α.aβ] in Ii → shift; [A→α.] in Ii → reduce on FOLLOW(A); [S'→S.] → accept</li>
+                <li><b>4.</b> GOTO table: for non-terminals only</li>
+                <li><b>Conflict?</b> Multiple entries in one cell = grammar is NOT SLR(1)</li>
+              </ul>
+            </div>
           </div>
+
+          <!-- TOPIC 6: SDT -->
           <div class="topic">
             <div class="topic-title">Syntax Directed Translation (SDT)</div>
-            <ul class="qlist">
-              <li><b>Synthesized attribute</b> — value computed from children. Used in S-attributed SDTs.</li>
-              <li><b>Inherited attribute</b> — value passed from parent/sibling. Used in L-attributed SDTs.</li>
-              <li><b>S-attributed</b> — only synthesized attributes. Safe to evaluate during bottom-up parse.</li>
-              <li><b>L-attributed</b> — inherited attrs depend only on left siblings or parent. Safe with top-down parse.</li>
-              <li><b>Annotated parse tree</b> — parse tree with attribute values at each node.</li>
-            </ul>
+            <p style="font-size:14px;line-height:1.6;margin-bottom:12px;">
+              An <b>SDD</b> extends CFG by attaching <b>attributes</b> (values) to grammar symbols and <b>semantic rules</b> to productions. Used to compute expression values, propagate types, and generate IR code.
+            </p>
+            <svg viewBox="0 0 560 195" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);">
+              <defs>
+                <marker id="a-up2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)"/></marker>
+                <marker id="a-dn2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706"/></marker>
+              </defs>
+              <text x="140" y="18" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle">Synthesized ↑</text>
+              <rect x="80" y="30" width="120" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="140" y="48" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--text)" text-anchor="middle">Child.val</text>
+              <line x1="140" y1="58" x2="140" y2="88" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#a-up2)"/>
+              <rect x="60" y="90" width="160" height="30" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="140" y="109" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="var(--accent)" text-anchor="middle">Parent.val = f(child)</text>
+              <text x="140" y="140" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">E.val = E1.val + T.val</text>
+              <text x="140" y="158" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">→ S-Attributed, LR parser</text>
+              <line x1="280" y1="10" x2="280" y2="185" stroke="var(--border)" stroke-width="1" stroke-dasharray="4"/>
+              <text x="420" y="18" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#d97706" text-anchor="middle">Inherited ↓</text>
+              <rect x="345" y="30" width="150" height="30" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
+              <text x="420" y="49" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="var(--text)" text-anchor="middle">Parent / Left-sibling</text>
+              <line x1="420" y1="60" x2="420" y2="88" stroke="#d97706" stroke-width="2.5" marker-end="url(#a-dn2)"/>
+              <rect x="340" y="90" width="160" height="30" rx="4" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1.5"/>
+              <text x="420" y="109" font-family="JetBrains Mono,monospace" font-size="11" fill="#d97706" text-anchor="middle">Child.inh = parent</text>
+              <text x="420" y="140" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">L.inh = T.type</text>
+              <text x="420" y="158" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">→ L-Attributed, LL parser</text>
+            </svg>
+            <table class="notes-table">
+              <thead><tr><th>Property</th><th>S-Attributed</th><th>L-Attributed</th></tr></thead>
+              <tbody>
+                <tr><td>Attributes</td><td>Synthesized ONLY</td><td>Synth + restricted inherited</td></tr>
+                <tr><td>Info flows</td><td>Bottom-up (child → parent)</td><td>Left-to-right (parent/left → child)</td></tr>
+                <tr><td>Evaluation</td><td>Post-order traversal</td><td>Single L→R pass</td></tr>
+                <tr><td>Parser type</td><td>LR (bottom-up)</td><td>LL (top-down)</td></tr>
+              </tbody>
+            </table>
           </div>
-          <div class="takeaway"><b>Exam tip:</b> Practice SLR/LALR table construction from scratch — it's a guaranteed numerical. Draw the LR(0) item sets step by step.</div>
+
+          <div class="takeaway"><b>Exam tip:</b> Three guaranteed questions — (1) SLR/LALR table construction, (2) FIRST/FOLLOW computation, (3) synthesized vs inherited attributes. Master these three and Unit 2 is done.</div>
           <div class="pager" id="pager-notes-unit2"></div>
         </section>
 
