@@ -2391,158 +2391,166 @@ int main() { yylex(); return 0; }</pre>
         </section>
 
         <!-- NOTES UNIT 2 -->
+        <!-- NOTES UNIT 2 -->
         <section class="page" data-id="notes-unit2">
           <div class="unit-eyebrow">Unit 2 — Notes</div>
-          <h2 class="unit-title">Syntax Analysis &amp; SDT</h2>
-          <p class="unit-intro">The heaviest unit (~35% exam weight). Covers CFG, grammar transformations, FIRST/FOLLOW, LL(1), LR/SLR/LALR parsers, and Syntax Directed Translation.</p>
+          <h2 class="unit-title">Syntax Analysis &amp; Syntax-Directed Translation</h2>
+          <p class="unit-intro">The heaviest unit (~35% exam weight). Full GATE- and exam-ready coverage: CFG, grammar transformations, FIRST/FOLLOW, LL(1), shift-reduce, SLR/LALR/CLR parsing tables, and complete SDT/attribute theory with worked examples.</p>
           <div class="stat-row">
-            <div class="stat"><div class="stat-val">10</div><div class="stat-label">key topics</div></div>
+            <div class="stat"><div class="stat-val">34</div><div class="stat-label">topics covered</div></div>
             <div class="stat"><div class="stat-val">~35%</div><div class="stat-label">exam weight</div></div>
             <div class="stat"><div class="stat-val">★★★</div><div class="stat-label">difficulty</div></div>
           </div>
 
-          <!-- TOPIC 1: CFG -->
+          <!-- PART A: SYNTAX ANALYSIS -->
           <div class="topic">
-            <div class="topic-title">Context-Free Grammar (CFG)</div>
-            <p style="font-size:14px;line-height:1.6;margin-bottom:12px;">
-              A <b>CFG</b> is a 4-tuple <b>G = (V, T, P, S)</b> where V = non-terminals, T = terminals, P = productions (A → α), S = start symbol. Every valid program is a sentence of L(G).
-            </p>
-            <!-- SVG: CFG components diagram -->
-            <svg viewBox="0 0 620 130" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);padding:8px 0;">
-              <defs>
-                <marker id="a2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                  <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)"/>
-                </marker>
-              </defs>
-              <rect x="10" y="30" width="120" height="70" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
-              <text x="70" y="58" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="middle">V</text>
-              <text x="70" y="76" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Non-terminals</text>
-              <text x="70" y="90" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">E, T, F, S</text>
-              <rect x="150" y="30" width="120" height="70" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="210" y="58" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--text)" text-anchor="middle">T</text>
-              <text x="210" y="76" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Terminals</text>
-              <text x="210" y="90" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">id, +, *, (, )</text>
-              <rect x="290" y="30" width="150" height="70" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="365" y="58" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--text)" text-anchor="middle">P</text>
-              <text x="365" y="76" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Productions</text>
-              <text x="365" y="90" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">E → E+T | T</text>
-              <rect x="460" y="30" width="140" height="70" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
-              <text x="530" y="58" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="middle">S</text>
-              <text x="530" y="76" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">Start Symbol</text>
-              <text x="530" y="90" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">Top-level NT</text>
-              <text x="310" y="20" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--accent)" text-anchor="middle">G = ( V ,  T ,  P ,  S )</text>
-            </svg>
-            <h4 style="font-size:13px;font-weight:600;margin:12px 0 6px;">Grammar Transformations (required before LL parsing):</h4>
-            <table class="notes-table">
-              <thead><tr><th>Problem</th><th>What It Is</th><th>Fix</th><th>Example</th></tr></thead>
-              <tbody>
-                <tr><td><b>Left Recursion</b></td><td>A → Aα (causes infinite loop in top-down)</td><td>A → βA' &nbsp; A' → αA' | ε</td><td>E → E+T | T &nbsp;→&nbsp; E → TE', E' → +TE'|ε</td></tr>
-                <tr><td><b>Left Factoring</b></td><td>A → αβ | αγ (parser can't choose)</td><td>A → αA' &nbsp; A' → β | γ</td><td>A → abD | abE &nbsp;→&nbsp; A → abA', A' → D|E</td></tr>
-                <tr><td><b>Ambiguity</b></td><td>String has 2+ parse trees</td><td>Rewrite with precedence levels</td><td>E→E+E|E*E|id &nbsp;→&nbsp; use E,T,F hierarchy</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- TOPIC 2: PARSE TREE & DERIVATIONS -->
-          <div class="topic">
-            <div class="topic-title">Parse Tree &amp; Derivations</div>
-            <p style="font-size:14px;line-height:1.6;margin-bottom:12px;">
-              A <b>Parse Tree</b> shows the derivation graphically. Root = Start Symbol, internal nodes = Non-terminals, leaves = Terminals. The frontier (leaves L→R) = the input string.
-            </p>
-            <!-- SVG: Parse Tree for id+id*id -->
-            <svg viewBox="0 0 500 220" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);">
-              <defs>
-                <marker id="a3" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                  <path d="M 0 2 L 8 5 L 0 8 z" fill="var(--border)"/>
-                </marker>
-              </defs>
-              <!-- title -->
-              <text x="250" y="18" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--accent)" text-anchor="middle">Parse Tree for: id + id * id</text>
-              <!-- Root E -->
-              <circle cx="250" cy="40" r="14" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
-              <text x="250" y="45" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle">E</text>
-              <!-- E -> E + T -->
-              <line x1="240" y1="54" x2="150" y2="86" stroke="var(--border)" stroke-width="1.5"/>
-              <line x1="250" y1="54" x2="250" y2="86" stroke="var(--border)" stroke-width="1.5"/>
-              <line x1="260" y1="54" x2="355" y2="86" stroke="var(--border)" stroke-width="1.5"/>
-              <!-- left E -->
-              <circle cx="150" cy="100" r="13" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
-              <text x="150" y="105" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--accent)" text-anchor="middle">E</text>
-              <!-- + terminal -->
-              <rect x="237" y="88" width="26" height="24" rx="3" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1"/>
-              <text x="250" y="104" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">+</text>
-              <!-- T -->
-              <circle cx="355" cy="100" r="13" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="355" y="105" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">T</text>
-              <!-- E -> T -->
-              <line x1="150" y1="113" x2="150" y2="140" stroke="var(--border)" stroke-width="1.5"/>
-              <circle cx="150" cy="154" r="13" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="150" y="159" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">T</text>
-              <!-- T -> F -> id -->
-              <line x1="150" y1="167" x2="150" y2="190" stroke="var(--border)" stroke-width="1.5"/>
-              <rect x="130" y="190" width="40" height="22" rx="3" fill="var(--bg)" stroke="var(--accent)" stroke-width="1"/>
-              <text x="150" y="205" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--accent)" text-anchor="middle">id</text>
-              <!-- T -> T * F -->
-              <line x1="345" y1="113" x2="290" y2="145" stroke="var(--border)" stroke-width="1.5"/>
-              <line x1="355" y1="113" x2="355" y2="145" stroke="var(--border)" stroke-width="1.5"/>
-              <line x1="365" y1="113" x2="415" y2="145" stroke="var(--border)" stroke-width="1.5"/>
-              <!-- T child -->
-              <circle cx="290" cy="158" r="13" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="290" y="163" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">T</text>
-              <!-- * -->
-              <rect x="342" y="146" width="26" height="24" rx="3" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1"/>
-              <text x="355" y="162" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">*</text>
-              <!-- F -->
-              <circle cx="415" cy="158" r="13" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="415" y="163" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--text)" text-anchor="middle">F</text>
-              <!-- id leaves -->
-              <line x1="290" y1="171" x2="290" y2="190" stroke="var(--border)" stroke-width="1.5"/>
-              <rect x="270" y="190" width="40" height="22" rx="3" fill="var(--bg)" stroke="var(--accent)" stroke-width="1"/>
-              <text x="290" y="205" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--accent)" text-anchor="middle">id</text>
-              <line x1="415" y1="171" x2="415" y2="190" stroke="var(--border)" stroke-width="1.5"/>
-              <rect x="395" y="190" width="40" height="22" rx="3" fill="var(--bg)" stroke="var(--accent)" stroke-width="1"/>
-              <text x="415" y="205" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--accent)" text-anchor="middle">id</text>
-              <!-- legend -->
-              <circle cx="30" cy="210" r="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
-              <text x="44" y="214" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)">= Non-terminal</text>
-              <rect x="155" y="202" width="20" height="16" rx="2" fill="var(--bg)" stroke="var(--accent)" stroke-width="1"/>
-              <text x="180" y="214" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)">= Terminal (leaf)</text>
-            </svg>
+            <div class="topic-title">1. Syntax Analysis — Definition &amp; Position in the Compiler</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;"><b>Syntax analysis (parsing)</b> is the second phase of compilation. It takes the token stream from the lexer and determines whether that stream can be generated by the grammar of the source language. If it can, the parser builds a parse tree or AST; if not, it reports a syntax error.</p>
+            <div class="notes-box tip">
+              <div class="notes-box-title tip">// Key distinction</div>
+              <p style="font-size:13px;line-height:1.6;margin:0;">Lexical analysis: <em>is each token individually well-formed?</em><br>Syntax analysis: <em>are the tokens arranged in a pattern the grammar permits?</em><br>
+              <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;">int = x + 5;</code> — every token is valid, but placing <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;">int</code> as an LHS is a <b>syntax error</b>.</p>
+            </div>
             <table class="notes-table" style="margin-top:12px;">
-              <thead><tr><th>Derivation Type</th><th>Rule</th><th>Used In</th><th>Key fact</th></tr></thead>
+              <thead><tr><th>Property</th><th>Top-Down (LL)</th><th>Bottom-Up (LR)</th></tr></thead>
               <tbody>
-                <tr><td><b>Leftmost</b></td><td>Always expand leftmost NT first</td><td>Top-Down / LL parsers</td><td>Predictive parsing uses this</td></tr>
-                <tr><td><b>Rightmost</b></td><td>Always expand rightmost NT first</td><td>Bottom-Up / LR parsers (reversed)</td><td>LR tracing reads this backwards</td></tr>
+                <tr><td>Tree built</td><td>Root → leaves</td><td>Leaves → root</td></tr>
+                <tr><td>Simulates</td><td>Leftmost derivation</td><td>Rightmost derivation (in reverse)</td></tr>
+                <tr><td>Grammar class handled</td><td>LL grammars</td><td>LR grammars (strict superset)</td></tr>
+                <tr><td>Representatives</td><td>Recursive descent, LL(1)</td><td>SLR(1), LALR(1), CLR(1)</td></tr>
               </tbody>
             </table>
           </div>
 
-          <!-- TOPIC 3: FIRST & FOLLOW -->
+          <!-- CFG -->
           <div class="topic">
-            <div class="topic-title">FIRST &amp; FOLLOW Sets</div>
-            <p style="font-size:14px;line-height:1.6;margin-bottom:12px;">Foundation for all parsing tables. Compute these before building any LL(1) or SLR table.</p>
-            <svg viewBox="0 0 580 150" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);">
-              <rect x="20" y="20" width="250" height="110" rx="5" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
-              <text x="145" y="42" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="middle">FIRST(α)</text>
-              <text x="145" y="62" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Terminals that can START</text>
-              <text x="145" y="78" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">strings derived from α</text>
-              <text x="145" y="98" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)" text-anchor="middle">ε ∈ FIRST if α ⇒* ε</text>
-              <text x="145" y="116" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)" text-anchor="middle">FIRST(id+T) = {id}</text>
-              <line x1="290" y1="20" x2="290" y2="130" stroke="var(--border)" stroke-width="1" stroke-dasharray="4"/>
-              <rect x="310" y="20" width="250" height="110" rx="5" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="435" y="42" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--text)" text-anchor="middle">FOLLOW(A)</text>
-              <text x="435" y="62" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Terminals immediately</text>
-              <text x="435" y="78" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">AFTER A in sentential form</text>
-              <text x="435" y="98" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)" text-anchor="middle">$ ∈ FOLLOW(Start). NEVER ε!</text>
-              <text x="435" y="116" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)" text-anchor="middle">FOLLOW(E) = { ), $ }</text>
-            </svg>
-            <ul class="qlist" style="margin-bottom:10px;">
-              <li><b>FIRST rules:</b> FIRST(terminal)={terminal}; if A→ε add ε; for A→X₁X₂…Xk chain through Xi while ε∈FIRST(Xi)</li>
-              <li><b>FOLLOW rules:</b> $ in FOLLOW(S); A→αBβ: add FIRST(β)−{ε}; if ε∈FIRST(β) or B at end: add FOLLOW(A)</li>
-              <li class="repeat">ε is <b>NEVER</b> in FOLLOW. $ is <b>NEVER</b> in FIRST. <span class="tag">exam trap</span></li>
-            </ul>
+            <div class="topic-title">3. Context-Free Grammars (CFG)</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">A <b>CFG</b> is a 4-tuple <b>G = (V, T, P, S)</b>: V = non-terminals, T = terminals, P = productions (A → α), S = start symbol. Called "context-free" because A may be replaced regardless of surrounding symbols.</p>
             <div class="notes-box exam">
-              <div class="notes-box-title exam">// Worked Example: E→TE', E'→+TE'|ε, T→FT', T'→*FT'|ε, F→(E)|id</div>
+              <div class="notes-box-title exam">// Classic example: arithmetic expressions</div>
+              <div class="notes-code-block">V = {E,T,F}   T = {+,*,(,),id}   S = E
+E → E + T | T
+T → T * F | F
+F → ( E ) | id</div>
+              <p style="font-size:13px;line-height:1.6;margin:6px 0 0;">Precedence is <em>structural</em>: * is one level deeper than + so it always binds tighter.</p>
+            </div>
+            <table class="notes-table" style="margin-top:12px;">
+              <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td><b>Terminal</b></td><td>Atomic token; leaf of parse tree; cannot be rewritten</td></tr>
+                <tr><td><b>Non-terminal</b></td><td>Syntactic category; internal node; rewritten via productions</td></tr>
+                <tr><td><b>Sentential form</b></td><td>Any string of terminals/NTs reachable from S</td></tr>
+                <tr><td><b>Sentence</b></td><td>Sentential form containing only terminals</td></tr>
+                <tr><td><b>L(G)</b></td><td>{ w ∈ T* | S ⇒* w } — all sentences derivable from S</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- DERIVATIONS & PARSE TREES -->
+          <div class="topic">
+            <div class="topic-title">5–6. Derivations &amp; Parse Trees</div>
+            <table class="notes-table">
+              <thead><tr><th>Property</th><th>Leftmost (⇒lm)</th><th>Rightmost (⇒rm)</th></tr></thead>
+              <tbody>
+                <tr><td>Expansion order</td><td>Always expand leftmost NT</td><td>Always expand rightmost NT</td></tr>
+                <tr><td>Natural for</td><td>Top-down / LL parsers</td><td>Bottom-up / LR parsers (traced in reverse)</td></tr>
+                <tr><td>Also called</td><td>—</td><td>Canonical derivation</td></tr>
+              </tbody>
+            </table>
+            <div class="notes-box tip" style="margin-top:12px;">
+              <div class="notes-box-title tip">// Leftmost derivation of id + id * id</div>
+              <div class="notes-code-block">E ⇒lm E+T ⇒lm T+T ⇒lm F+T ⇒lm id+T ⇒lm id+T*F ⇒lm id+F*F ⇒lm id+id*F ⇒lm id+id*id</div>
+            </div>
+            <p style="font-size:13.5px;line-height:1.7;margin-top:12px;color:var(--text-muted);">A <b>parse tree</b> root = start symbol S; internal nodes = NTs; leaves = terminals; frontier (left→right) = input string. It encodes precedence and associativity structurally.</p>
+            <table class="notes-table" style="margin-top:10px;">
+              <thead><tr><th>Feature</th><th>Parse Tree (Concrete)</th><th>AST (Abstract)</th></tr></thead>
+              <tbody>
+                <tr><td>Contains</td><td>Every grammar symbol used</td><td>Only semantically essential nodes</td></tr>
+                <tr><td>Parentheses</td><td>Explicit nodes</td><td>Implicit in tree shape</td></tr>
+                <tr><td>Typical use</td><td>Verifying a derivation</td><td>Semantic analysis, code generation</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- AMBIGUITY -->
+          <div class="topic">
+            <div class="topic-title">7. Ambiguity</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">A CFG is <b>ambiguous</b> if at least one string has more than one parse tree (≡ more than one leftmost derivation). Two trees → two meanings.</p>
+            <div class="notes-box exam">
+              <div class="notes-box-title exam">// Classic ambiguous grammar</div>
+              <div class="notes-code-block">E → E + E | E * E | id   (ambiguous — two trees for id+id*id)</div>
+            </div>
+            <table class="notes-table" style="margin-top:10px;">
+              <thead><tr><th>Resolution method</th><th>How</th></tr></thead>
+              <tbody>
+                <tr><td>Rewrite grammar</td><td>Encode precedence as nested NTs: E→E+T | T, T→T*F | F, F→id</td></tr>
+                <tr><td>Parser-generator declarations</td><td>%left, %right, %nonassoc in Yacc/Bison — no grammar rewrite needed</td></tr>
+              </tbody>
+            </table>
+            <table class="notes-table" style="margin-top:10px;">
+              <thead><tr><th>Operator</th><th>Associativity</th><th>Grammar pattern</th></tr></thead>
+              <tbody>
+                <tr><td>+ , −</td><td>Left</td><td>E → E + T (recursion on the left)</td></tr>
+                <tr><td>^ (power)</td><td>Right</td><td>F → T ^ F (recursion on the right)</td></tr>
+              </tbody>
+            </table>
+            <div class="notes-box interview" style="margin-top:10px;">
+              <div class="notes-box-title interview">// Dangling-else</div>
+              <p style="font-size:13px;line-height:1.6;margin:0;">S → if E then S | if E then S else S | other — ambiguous; else binds to nearest unmatched if by convention.</p>
+            </div>
+          </div>
+
+          <!-- GRAMMAR TRANSFORMATIONS -->
+          <div class="topic">
+            <div class="topic-title">9. Grammar Transformations — Left Recursion &amp; Left Factoring</div>
+            <div class="notes-box exam">
+              <div class="notes-box-title exam">// Left Recursion Removal</div>
+              <div class="notes-code-block">A → Aα | β   ⟹   A → βA'    A' → αA' | ε
+
+Example:
+  E → E + T | T   ⟹   E → TE'    E' → +TE' | ε</div>
+            </div>
+            <div class="notes-box tip" style="margin-top:10px;">
+              <div class="notes-box-title tip">// Left Factoring</div>
+              <div class="notes-code-block">A → αβ1 | αβ2   ⟹   A → αA'    A' → β1 | β2
+
+Example (dangling-else):
+  S → if E then S | if E then S else S
+  ⟹  S → if E then S S'    S' → else S | ε</div>
+            </div>
+            <table class="notes-table" style="margin-top:10px;">
+              <thead><tr><th>Aspect</th><th>Left Recursion</th><th>Left Factoring</th></tr></thead>
+              <tbody>
+                <tr><td>Symptom</td><td>Parser loops forever without consuming input</td><td>Parser can't choose between two alternatives</td></tr>
+                <tr><td>Root cause</td><td>A → Aα | β</td><td>A → αβ1 | αβ2</td></tr>
+                <tr><td>Fix</td><td>Rewrite as right recursion</td><td>Factor prefix into new NT</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- FIRST & FOLLOW -->
+          <div class="topic">
+            <div class="topic-title">10. FIRST and FOLLOW Sets</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">Foundation for all parsing tables. Must be computed before building any LL(1) or SLR table.</p>
+            <div class="notes-box exam">
+              <div class="notes-box-title exam">// FIRST(α) computation rules</div>
+              <ul class="qlist">
+                <li>FIRST(a) = {a} for every terminal a</li>
+                <li>If A → ε is a production, then ε ∈ FIRST(A)</li>
+                <li>For A → X₁X₂…Xk: add FIRST(Xi)−{ε} progressively while ε ∈ FIRST(X1)…FIRST(Xi−1); add ε only if ε ∈ FIRST(all Xi)</li>
+              </ul>
+            </div>
+            <div class="notes-box exam" style="margin-top:10px;">
+              <div class="notes-box-title exam">// FOLLOW(A) computation rules</div>
+              <ul class="qlist">
+                <li>$ ∈ FOLLOW(S)  — Rule 1, always</li>
+                <li>A → αBβ: add FIRST(β)−{ε} to FOLLOW(B)</li>
+                <li>A → αB  or  A → αBβ with ε ∈ FIRST(β): add FOLLOW(A) to FOLLOW(B)</li>
+                <li class="repeat">ε is <b>NEVER</b> in any FOLLOW set. $ is <b>NEVER</b> in any FIRST set. <span class="tag">exam trap</span></li>
+              </ul>
+            </div>
+            <div class="notes-box tip" style="margin-top:12px;">
+              <div class="notes-box-title tip">// Worked example: E→TE', E'→+TE'|ε, T→FT', T'→*FT'|ε, F→(E)|id</div>
               <table class="notes-table" style="margin-top:8px;">
                 <thead><tr><th>NT</th><th>FIRST</th><th>FOLLOW</th></tr></thead>
                 <tbody>
@@ -2556,215 +2564,466 @@ int main() { yylex(); return 0; }</pre>
             </div>
           </div>
 
-          <!-- TOPIC 4: TOP-DOWN vs BOTTOM-UP -->
+          <!-- LL(1) -->
           <div class="topic">
-            <div class="topic-title">Top-Down vs Bottom-Up Parsing</div>
-            <svg viewBox="0 0 580 200" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);">
-              <defs>
-                <marker id="arr-td" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)"/></marker>
-                <marker id="arr-bu" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--text-muted)"/></marker>
-              </defs>
-              <text x="145" y="18" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle">TOP-DOWN (LL)</text>
-              <rect x="80" y="26" width="130" height="28" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
-              <text x="145" y="44" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="var(--accent)" text-anchor="middle">Start Symbol (S)</text>
-              <line x1="145" y1="54" x2="145" y2="74" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-td)"/>
-              <rect x="70" y="75" width="150" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="145" y="93" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Predict &amp; Expand NT</text>
-              <line x1="145" y1="103" x2="145" y2="123" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-td)"/>
-              <rect x="70" y="124" width="150" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="145" y="142" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Match Terminals</text>
-              <line x1="145" y1="152" x2="145" y2="172" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-td)"/>
-              <rect x="60" y="173" width="170" height="24" rx="4" fill="var(--accent)" stroke="var(--accent)" stroke-width="1.5"/>
-              <text x="145" y="189" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="white" text-anchor="middle">Leaves = Input String ✓</text>
-              <line x1="290" y1="10" x2="290" y2="200" stroke="var(--border)" stroke-width="1" stroke-dasharray="5"/>
-              <text x="435" y="18" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--text-muted)" text-anchor="middle">BOTTOM-UP (LR)</text>
-              <rect x="355" y="173" width="160" height="24" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="435" y="189" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="var(--text)" text-anchor="middle">Input Token Stream</text>
-              <line x1="435" y1="172" x2="435" y2="152" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arr-bu)"/>
-              <rect x="355" y="124" width="160" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="435" y="142" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Shift / Reduce handles</text>
-              <line x1="435" y1="123" x2="435" y2="103" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arr-bu)"/>
-              <rect x="355" y="75" width="160" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="435" y="93" font-family="Inter,sans-serif" font-size="11" fill="var(--text)" text-anchor="middle">Stack + ACTION/GOTO</text>
-              <line x1="435" y1="74" x2="435" y2="54" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arr-bu)"/>
-              <rect x="360" y="26" width="150" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="435" y="44" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="var(--text)" text-anchor="middle">Start Symbol (S) ✓</text>
-            </svg>
-            <table class="notes-table">
-              <thead><tr><th>Property</th><th>Top-Down (LL)</th><th>Bottom-Up (LR)</th></tr></thead>
-              <tbody>
-                <tr><td>Direction</td><td>Root → Leaves</td><td>Leaves → Root</td></tr>
-                <tr><td>Derivation</td><td>Leftmost</td><td>Rightmost (reversed)</td></tr>
-                <tr><td>Left recursion</td><td>❌ Infinite loop</td><td>✅ Handles it</td></tr>
-                <tr><td>Power</td><td>Less (LL grammars only)</td><td>More (all LR grammars)</td></tr>
-                <tr><td>Examples</td><td>LL(1), Recursive Descent</td><td>SLR, LALR, CLR</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- TOPIC 5: LR PARSER HIERARCHY -->
-          <div class="topic">
-            <div class="topic-title">LR Parser Power Hierarchy</div>
-            <svg viewBox="0 0 500 195" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);">
-              <ellipse cx="250" cy="100" rx="230" ry="85" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="5"/>
-              <text x="460" y="48" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)">CLR(1)</text>
-              <ellipse cx="250" cy="100" rx="175" ry="65" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="5"/>
-              <text x="412" y="68" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)">LALR(1)</text>
-              <ellipse cx="250" cy="100" rx="120" ry="45" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="5"/>
-              <text x="362" y="88" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--text-muted)">SLR(1)</text>
-              <ellipse cx="250" cy="100" rx="65" ry="26" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
-              <text x="250" y="105" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle">LR(0)</text>
-              <text x="250" y="183" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">LR(0) ⊂ SLR(1) ⊂ LALR(1) ⊂ CLR(1) — outer = more grammars handled</text>
-            </svg>
-            <table class="notes-table">
-              <thead><tr><th>Parser</th><th>Lookahead</th><th>Table size</th><th>Used in</th></tr></thead>
-              <tbody>
-                <tr><td><b>LR(0)</b></td><td>None</td><td>Small</td><td>Theory only</td></tr>
-                <tr><td><b>SLR(1)</b></td><td>FOLLOW(A)</td><td>Small</td><td>Rarely</td></tr>
-                <tr><td><b>LALR(1)</b></td><td>Merged CLR lookaheads</td><td>Small</td><td><b>yacc / bison ← industry standard</b></td></tr>
-                <tr><td><b>CLR(1)</b></td><td>Exact per-item</td><td>Large</td><td>Reference only</td></tr>
-              </tbody>
-            </table>
-            <div class="notes-box tip" style="margin-top:12px;">
-              <div class="notes-box-title tip">// SLR Table Construction — Step by Step</div>
-              <ul class="qlist">
-                <li><b>1.</b> Augment: add S' → S</li>
-                <li><b>2.</b> I0 = CLOSURE({S'→.S}), then GOTO(Ii, X) for every symbol X</li>
-                <li><b>3.</b> ACTION: [A→α.aβ] in Ii → shift; [A→α.] in Ii → reduce on FOLLOW(A); [S'→S.] → accept</li>
-                <li><b>4.</b> GOTO table: for non-terminals only</li>
-                <li><b>Conflict?</b> Multiple entries in one cell = grammar is NOT SLR(1)</li>
-              </ul>
+            <div class="topic-title">11. Predictive LL(1) Parsing</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;"><b>LL(1)</b>: scans <b>L</b>eft-to-right, produces <b>L</b>eftmost derivation, uses <b>1</b> token lookahead. No backtracking. A grammar is LL(1) iff its table has at most one entry per cell.</p>
+            <div class="notes-box exam">
+              <div class="notes-box-title exam">// LL(1) Table Construction</div>
+              <div class="notes-code-block">for each production A → α:
+    for each terminal a ∈ FIRST(α):  M[A, a] = A→α
+    if ε ∈ FIRST(α):
+        for each b ∈ FOLLOW(A):      M[A, b] = A→α
+// Multiple entries in one cell → grammar is NOT LL(1)</div>
+            </div>
+            <div class="notes-box tip" style="margin-top:10px;">
+              <div class="notes-box-title tip">// LL(1) table (same grammar)</div>
+              <table class="notes-table" style="margin-top:8px;">
+                <thead><tr><th></th><th>id</th><th>+</th><th>*</th><th>(</th><th>)</th><th>$</th></tr></thead>
+                <tbody>
+                  <tr><td><b>E</b></td><td>E→TE'</td><td></td><td></td><td>E→TE'</td><td></td><td></td></tr>
+                  <tr><td><b>E'</b></td><td></td><td>E'→+TE'</td><td></td><td></td><td>E'→ε</td><td>E'→ε</td></tr>
+                  <tr><td><b>T</b></td><td>T→FT'</td><td></td><td></td><td>T→FT'</td><td></td><td></td></tr>
+                  <tr><td><b>T'</b></td><td></td><td>T'→ε</td><td>T'→*FT'</td><td></td><td>T'→ε</td><td>T'→ε</td></tr>
+                  <tr><td><b>F</b></td><td>F→id</td><td></td><td></td><td>F→(E)</td><td></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="notes-box exam" style="margin-top:10px;">
+              <div class="notes-box-title exam">// LL(1) condition (formal)</div>
+              <p style="font-size:13px;line-height:1.6;margin:0;">For every A with alternatives A → α | β: (1) FIRST(α) ∩ FIRST(β) = ∅; (2) at most one can derive ε; (3) if ε ∈ FIRST(α) then FIRST(β) ∩ FOLLOW(A) = ∅.</p>
             </div>
           </div>
 
-          <!-- TOPIC 6: SDT -->
+          <!-- BOTTOM-UP / SHIFT-REDUCE -->
           <div class="topic">
-            <div class="topic-title">Syntax Directed Translation (SDT)</div>
-            <p style="font-size:14px;line-height:1.6;margin-bottom:12px;">
-              An <b>SDD</b> extends CFG by attaching <b>attributes</b> (values) to grammar symbols and <b>semantic rules</b> to productions. Used to compute expression values, propagate types, and generate IR code.
-            </p>
-            <svg viewBox="0 0 560 195" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin:14px 0;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);">
-              <defs>
-                <marker id="a-up2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)"/></marker>
-                <marker id="a-dn2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706"/></marker>
-              </defs>
-              <text x="140" y="18" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--accent)" text-anchor="middle">Synthesized ↑</text>
-              <rect x="80" y="30" width="120" height="28" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="140" y="48" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--text)" text-anchor="middle">Child.val</text>
-              <line x1="140" y1="58" x2="140" y2="88" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#a-up2)"/>
-              <rect x="60" y="90" width="160" height="30" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
-              <text x="140" y="109" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="var(--accent)" text-anchor="middle">Parent.val = f(child)</text>
-              <text x="140" y="140" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">E.val = E1.val + T.val</text>
-              <text x="140" y="158" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">→ S-Attributed, LR parser</text>
-              <line x1="280" y1="10" x2="280" y2="185" stroke="var(--border)" stroke-width="1" stroke-dasharray="4"/>
-              <text x="420" y="18" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#d97706" text-anchor="middle">Inherited ↓</text>
-              <rect x="345" y="30" width="150" height="30" rx="4" fill="var(--code-bg)" stroke="var(--border)" stroke-width="1.5"/>
-              <text x="420" y="49" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="var(--text)" text-anchor="middle">Parent / Left-sibling</text>
-              <line x1="420" y1="60" x2="420" y2="88" stroke="#d97706" stroke-width="2.5" marker-end="url(#a-dn2)"/>
-              <rect x="340" y="90" width="160" height="30" rx="4" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1.5"/>
-              <text x="420" y="109" font-family="JetBrains Mono,monospace" font-size="11" fill="#d97706" text-anchor="middle">Child.inh = parent</text>
-              <text x="420" y="140" font-family="Inter,sans-serif" font-size="11" fill="var(--text-muted)" text-anchor="middle">L.inh = T.type</text>
-              <text x="420" y="158" font-family="Inter,sans-serif" font-size="10" fill="var(--text-muted)" text-anchor="middle">→ L-Attributed, LL parser</text>
-            </svg>
+            <div class="topic-title">12–13. Bottom-Up &amp; Shift-Reduce Parsing</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">Bottom-up parsing starts from the input string and repeatedly <b>reduces</b> a handle (substring matching a production's RHS) to the LHS non-terminal, tracing a <b>rightmost derivation in reverse</b>.</p>
             <table class="notes-table">
-              <thead><tr><th>Property</th><th>S-Attributed</th><th>L-Attributed</th></tr></thead>
+              <thead><tr><th>Action</th><th>Effect</th><th>Input pointer</th><th>Stack</th></tr></thead>
               <tbody>
-                <tr><td>Attributes</td><td>Synthesized ONLY</td><td>Synth + restricted inherited</td></tr>
-                <tr><td>Info flows</td><td>Bottom-up (child → parent)</td><td>Left-to-right (parent/left → child)</td></tr>
-                <tr><td>Evaluation</td><td>Post-order traversal</td><td>Single L→R pass</td></tr>
-                <tr><td>Parser type</td><td>LR (bottom-up)</td><td>LL (top-down)</td></tr>
+                <tr><td><b>Shift</b></td><td>Push next input token</td><td>Advances</td><td>Grows by 1</td></tr>
+                <tr><td><b>Reduce</b></td><td>Pop RHS, push LHS</td><td>Unchanged</td><td>Shrinks (generally)</td></tr>
+                <tr><td><b>Accept</b></td><td>Stack = $S, input = $</td><td>—</td><td>Done</td></tr>
+                <tr><td><b>Error</b></td><td>No valid action</td><td>—</td><td>Fail</td></tr>
+              </tbody>
+            </table>
+            <div class="notes-box tip" style="margin-top:12px;">
+              <div class="notes-box-title tip">// Complete trace: id + id * id (grammar E→E+T|T, T→T*F|F, F→id)</div>
+              <table class="notes-table" style="margin-top:8px;">
+                <thead><tr><th>Stack</th><th>Input</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td>$</td><td>id+id*id$</td><td>shift</td></tr>
+                  <tr><td>$ id</td><td>+id*id$</td><td>reduce F→id</td></tr>
+                  <tr><td>$ F</td><td>+id*id$</td><td>reduce T→F</td></tr>
+                  <tr><td>$ T</td><td>+id*id$</td><td>reduce E→T</td></tr>
+                  <tr><td>$ E</td><td>+id*id$</td><td>shift +</td></tr>
+                  <tr><td>$ E +</td><td>id*id$</td><td>shift id → reduce F→id → reduce T→F</td></tr>
+                  <tr><td>$ E + T</td><td>*id$</td><td>shift * (not reduce — * has higher prec)</td></tr>
+                  <tr><td>$ E + T *</td><td>id$</td><td>shift id → reduce F→id</td></tr>
+                  <tr><td>$ E + T * F</td><td>$</td><td>reduce T→T*F</td></tr>
+                  <tr><td>$ E + T</td><td>$</td><td>reduce E→E+T</td></tr>
+                  <tr><td>$ E</td><td>$</td><td><b>ACCEPT</b></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <table class="notes-table" style="margin-top:12px;">
+              <thead><tr><th>Conflict</th><th>Meaning</th><th>Resolution</th></tr></thead>
+              <tbody>
+                <tr><td><b>Shift-reduce</b></td><td>Can't decide shift vs reduce</td><td>Operator precedence; correctly built LR table resolves it</td></tr>
+                <tr><td><b>Reduce-reduce</b></td><td>Can't decide which production to reduce by</td><td>Usually genuine grammar ambiguity — rewrite grammar</td></tr>
               </tbody>
             </table>
           </div>
 
-          <div class="takeaway"><b>Exam tip:</b> Three guaranteed questions — (1) SLR/LALR table construction, (2) FIRST/FOLLOW computation, (3) synthesized vs inherited attributes. Master these three and Unit 2 is done.</div>
+          <!-- LR(0) ITEMS & CANONICAL COLLECTION -->
+          <div class="topic">
+            <div class="topic-title">15–16. LR(0) Items, Canonical Collection &amp; SLR(1)</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">An <b>LR(0) item</b> is a production with a dot (•) marking progress. Completed items (dot at end) signal a possible reduction.</p>
+            <div class="notes-box exam">
+              <div class="notes-box-title exam">// CLOSURE and GOTO</div>
+              <div class="notes-code-block">CLOSURE(I):  for each item [A→α•Bβ] ∈ I: add [B→•γ] for every B→γ
+GOTO(I,X):   CLOSURE({ A→αX•β | [A→α•Xβ] ∈ I })</div>
+            </div>
+            <div class="notes-box tip" style="margin-top:10px;">
+              <div class="notes-box-title tip">// SLR(1) Table Construction Rules</div>
+              <ul class="qlist">
+                <li><b>Step 1.</b> Augment: add S' → S</li>
+                <li><b>Step 2.</b> Build LR(0) canonical collection via CLOSURE and GOTO</li>
+                <li><b>Step 3.</b> ACTION: [A→α•aβ] ∈ Ii → shift j; [A→α•] ∈ Ii, a ∈ FOLLOW(A) → reduce; [S'→S•] → accept</li>
+                <li><b>Step 4.</b> GOTO[i,A] = j when GOTO(Ii, A) = Ij for non-terminal A</li>
+                <li><b>Conflict?</b> Multiple entries in one cell = grammar is NOT SLR(1)</li>
+              </ul>
+            </div>
+            <div class="notes-box exam" style="margin-top:10px;">
+              <div class="notes-box-title exam">// SLR(1) ACTION/GOTO table (standard grammar 0–6)</div>
+              <table class="notes-table" style="margin-top:8px;">
+                <thead><tr><th>State</th><th>id</th><th>+</th><th>*</th><th>(</th><th>)</th><th>$</th><th>E</th><th>T</th><th>F</th></tr></thead>
+                <tbody>
+                  <tr><td>0</td><td>s5</td><td></td><td></td><td>s4</td><td></td><td></td><td>1</td><td>2</td><td>3</td></tr>
+                  <tr><td>1</td><td></td><td>s6</td><td></td><td></td><td></td><td>acc</td><td></td><td></td><td></td></tr>
+                  <tr><td>2</td><td></td><td>r2</td><td>s7</td><td></td><td>r2</td><td>r2</td><td></td><td></td><td></td></tr>
+                  <tr><td>3</td><td></td><td>r4</td><td>r4</td><td></td><td>r4</td><td>r4</td><td></td><td></td><td></td></tr>
+                  <tr><td>4</td><td>s5</td><td></td><td></td><td>s4</td><td></td><td></td><td>8</td><td>2</td><td>3</td></tr>
+                  <tr><td>5</td><td></td><td>r6</td><td>r6</td><td></td><td>r6</td><td>r6</td><td></td><td></td><td></td></tr>
+                  <tr><td>6</td><td>s5</td><td></td><td></td><td>s4</td><td></td><td></td><td></td><td>9</td><td>3</td></tr>
+                  <tr><td>7</td><td>s5</td><td></td><td></td><td>s4</td><td></td><td></td><td></td><td></td><td>10</td></tr>
+                  <tr><td>8</td><td></td><td>s6</td><td></td><td></td><td>s11</td><td></td><td></td><td></td><td></td></tr>
+                  <tr><td>9</td><td></td><td>r1</td><td>s7</td><td></td><td>r1</td><td>r1</td><td></td><td></td><td></td></tr>
+                  <tr><td>10</td><td></td><td>r3</td><td>r3</td><td></td><td>r3</td><td>r3</td><td></td><td></td><td></td></tr>
+                  <tr><td>11</td><td></td><td>r5</td><td>r5</td><td></td><td>r5</td><td>r5</td><td></td><td></td><td></td></tr>
+                </tbody>
+              </table>
+              <p style="font-size:12px;color:var(--text-muted);margin:6px 0 0;">sN = shift to state N; rN = reduce by production N; acc = accept; blank = error</p>
+            </div>
+          </div>
+
+          <!-- CLR and LALR -->
+          <div class="topic">
+            <div class="topic-title">17–18. CLR(1) and LALR(1) Parsing</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;"><b>CLR(1)</b> ("Canonical LR") attaches an exact lookahead terminal to every item: [A→α•β, a] — reduce only when next input = a. More precise than SLR but generates far more states.</p>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;"><b>LALR(1)</b> merges CLR(1) states that share the same LR(0) core, unioning their lookahead sets. Same state count as SLR, nearly as powerful as CLR. <em>Industry standard — used by Yacc/Bison.</em></p>
+            <div class="notes-box exam">
+              <div class="notes-box-title exam">// CLR(1) item closure (LR(1) closure)</div>
+              <div class="notes-code-block">for each [A→α•Bβ, a] ∈ I:
+    for each production B→γ:
+        for each b ∈ FIRST(βa): add [B→•γ, b]</div>
+            </div>
+            <div class="notes-box tip" style="margin-top:10px;">
+              <div class="notes-box-title tip">// LALR construction</div>
+              <ul class="qlist">
+                <li>1. Build full CLR(1) collection</li>
+                <li>2. Find all groups sharing same LR(0) core</li>
+                <li>3. Merge → union lookaheads</li>
+                <li>4. Merging can introduce reduce-reduce conflicts but <b>cannot</b> introduce new shift-reduce conflicts</li>
+              </ul>
+            </div>
+            <table class="notes-table" style="margin-top:12px;">
+              <thead><tr><th>Property</th><th>LR(0)</th><th>SLR(1)</th><th>LALR(1)</th><th>CLR(1)</th></tr></thead>
+              <tbody>
+                <tr><td>Lookahead</td><td>None</td><td>FOLLOW(A) — global</td><td>Merged LR(1)</td><td>Exact per-item</td></tr>
+                <tr><td>Power</td><td>Weakest</td><td>Weak</td><td>Strong</td><td>Strongest</td></tr>
+                <tr><td>State count</td><td>Fewest</td><td>Same as LR(0)</td><td>Same as SLR</td><td>Most (often 10× more)</td></tr>
+                <tr><td>Practical use</td><td>Theory</td><td>Rarely</td><td><b>Yacc / Bison</b></td><td>Reference only</td></tr>
+              </tbody>
+            </table>
+            <div class="takeaway" style="margin-top:10px;"><b>Power hierarchy:</b> LR(0) ⊂ SLR(1) ⊂ LALR(1) ⊆ CLR(1) ⊂ all deterministic CFLs</div>
+          </div>
+
+          <!-- PART B: SDT -->
+          <div class="topic">
+            <div class="topic-title">20–23. Syntax-Directed Definitions (SDD) &amp; Attributes</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;"><b>SDD = CFG + Attributes + Semantic Rules.</b> Attributes are values attached to grammar symbols; semantic rules specify how to compute them. Used to evaluate expressions, propagate types, and build ASTs.</p>
+            <table class="notes-table">
+              <thead><tr><th>Property</th><th>Synthesized ↑</th><th>Inherited ↓</th></tr></thead>
+              <tbody>
+                <tr><td>Computed from</td><td>Children's attributes</td><td>Parent's / left-sibling attributes</td></tr>
+                <tr><td>Information flows</td><td>Upward (bottom-up)</td><td>Downward / sideways</td></tr>
+                <tr><td>Appears as</td><td>LHS attribute of production</td><td>RHS-symbol attribute from context</td></tr>
+                <tr><td>Natural evaluation</td><td>Post-order (LR parser)</td><td>Pre-order / left-to-right (LL)</td></tr>
+                <tr><td>Typical example</td><td>E.val = E1.val + T.val</td><td>L.inh = T.type</td></tr>
+              </tbody>
+            </table>
+            <div class="notes-box exam" style="margin-top:12px;">
+              <div class="notes-box-title exam">// Synthesized: evaluate 3 + 4 * 5</div>
+              <div class="notes-code-block">E → E1 + T    E.val = E1.val + T.val
+T → T1 * F    T.val = T1.val * F.val
+F → num       F.val = num.val
+Result: F=3, F=4, F=5 → T=4*5=20 → E=3+20=23</div>
+            </div>
+            <div class="notes-box exam" style="margin-top:10px;">
+              <div class="notes-box-title exam">// Inherited: type propagation — int a, b</div>
+              <div class="notes-code-block">D → T L        L.inh = T.type
+T → int        T.type = integer
+L → L1 , id   L1.inh = L.inh ; addType(id.entry, L.inh)
+L → id         addType(id.entry, L.inh)</div>
+            </div>
+          </div>
+
+          <!-- S-attributed vs L-attributed -->
+          <div class="topic">
+            <div class="topic-title">25–26. S-Attributed vs L-Attributed SDDs</div>
+            <table class="notes-table">
+              <thead><tr><th>Property</th><th>S-Attributed</th><th>L-Attributed</th></tr></thead>
+              <tbody>
+                <tr><td>Attributes allowed</td><td>Synthesized only</td><td>Synthesized + restricted inherited</td></tr>
+                <tr><td>Inherited restriction</td><td>N/A</td><td>Xⱼ.inh depends only on parent A or X₁…Xⱼ₋₁ (left siblings)</td></tr>
+                <tr><td>Information flow</td><td>Strictly bottom-up</td><td>Left-to-right (interleaved up/down)</td></tr>
+                <tr><td>Evaluation</td><td>Single post-order pass</td><td>Single left-to-right depth-first pass</td></tr>
+                <tr><td>Natural parser</td><td>LR</td><td>LL or any left-to-right scheme</td></tr>
+                <tr><td>Subset relation</td><td>S-attributed ⊂ L-attributed</td><td>Superset of S-attributed</td></tr>
+              </tbody>
+            </table>
+            <div class="notes-box tip" style="margin-top:10px;">
+              <div class="notes-box-title tip">// Dependency graph</div>
+              <p style="font-size:13px;line-height:1.6;margin:0;">A directed graph where each node = one attribute instance; edge b→c = "c depends on b". A valid evaluation order = any topological sort. Cyclic graph → SDD <b>cannot</b> be evaluated.</p>
+            </div>
+          </div>
+
+          <!-- EXAM TIPS -->
+          <div class="topic">
+            <div class="topic-title">Common Mistakes &amp; Exam Traps</div>
+            <table class="notes-table">
+              <thead><tr><th>#</th><th>Mistake</th><th>Fix</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Putting ε into a FOLLOW set</td><td>FOLLOW sets never contain ε — only FIRST sets can</td></tr>
+                <tr><td>2</td><td>Forgetting $ ∈ FOLLOW(S)</td><td>Rule 1 — always add $ to the start symbol's FOLLOW</td></tr>
+                <tr><td>3</td><td>Stopping FIRST propagation too early</td><td>Keep adding FIRST(Xi+1) while ε ∈ FIRST(Xi), through the whole production</td></tr>
+                <tr><td>4</td><td>Using GOTO for terminals / ACTION for non-terminals</td><td>GOTO → indexed by non-terminals; ACTION → indexed by terminals</td></tr>
+                <tr><td>5</td><td>Forgetting to augment the grammar</td><td>Always add S' → S first — it is the unambiguous accept condition</td></tr>
+                <tr><td>6</td><td>Wrong pop-count on reduce</td><td>Reducing A → X1…Xk pops 2k entries (k symbol+state pairs), not k</td></tr>
+                <tr><td>7</td><td>Swapping synthesized and inherited</td><td>Synthesized = from children, flows UP. Inherited = from parent/left, flows DOWN.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="takeaway"><b>Exam focus:</b> Three guaranteed questions — (1) SLR/LALR table construction from scratch, (2) FIRST/FOLLOW computation, (3) synthesized vs inherited attributes. Master these three and Unit 2 is done.</div>
           <div class="pager" id="pager-notes-unit2"></div>
         </section>
 
         <!-- NOTES UNIT 3 -->
         <section class="page" data-id="notes-unit3">
           <div class="unit-eyebrow">Unit 3 — Notes</div>
-          <h2 class="unit-title">Type Checking &amp; Runtime Environment</h2>
-          <p class="unit-intro">How the compiler enforces type rules and how memory is organised at runtime.</p>
+          <h2 class="unit-title">Type Checking &amp; Run-Time Environment</h2>
+          <p class="unit-intro">How the compiler enforces type rules and how memory is organised at runtime. Irregular in exams (0–28 marks range) but storage allocation strategies appear almost every year.</p>
           <div class="stat-row">
-            <div class="stat"><div class="stat-val">5</div><div class="stat-label">key topics to know</div></div>
+            <div class="stat"><div class="stat-val">~13</div><div class="stat-label">marks avg (0–28 range)</div></div>
             <div class="stat"><div class="stat-val">~12%</div><div class="stat-label">exam weight</div></div>
-            <div class="stat"><div class="stat-val">★★☆</div><div class="stat-label">difficulty level</div></div>
+            <div class="stat"><div class="stat-val">★★☆</div><div class="stat-label">difficulty</div></div>
           </div>
+
           <div class="topic">
-            <div class="topic-title">Type Checking</div>
+            <div class="topic-title">1. Type Checking — Definition &amp; Role</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;"><b>Type checking</b> is the semantic analysis phase that verifies every operation is applied to operands of compatible types. If not, it raises a type error or performs an implicit type conversion.</p>
+            <table class="notes-table">
+              <thead><tr><th>Parameter</th><th>Static Type Checking</th><th>Dynamic Type Checking</th></tr></thead>
+              <tbody>
+                <tr><td>When performed</td><td>At compile time</td><td>At run time</td></tr>
+                <tr><td>Speed impact</td><td>No runtime overhead</td><td>Slower — checks every execution</td></tr>
+                <tr><td>Error detection</td><td>Before program runs</td><td>Only when offending line executes</td></tr>
+                <tr><td>Language examples</td><td>C, C++, Java, Rust</td><td>Python, JavaScript, Ruby</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="topic">
+            <div class="topic-title">2. The Type System</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">A <b>type system</b> assigns a type property to every expression and governs how types combine. It is defined by basic types (primitives) and type constructors that build new types.</p>
+            <table class="notes-table">
+              <thead><tr><th>Basic Types</th><th>Type Constructors</th></tr></thead>
+              <tbody>
+                <tr><td>boolean, char, integer, float, void</td><td>Arrays (array(n, T)), Pointers (pointer(T)), Functions (T→T), Records/Structs</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="topic">
+            <div class="topic-title">3. Type Expressions &amp; Type Equivalence</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">A <b>type expression</b> is a tree built from basic types and constructors. Two types are checked for equivalence in one of two ways:</p>
+            <table class="notes-table">
+              <thead><tr><th>Method</th><th>Definition</th><th>Example</th></tr></thead>
+              <tbody>
+                <tr><td><b>Structural equivalence</b></td><td>Two types are equivalent if they have the same structure (same tree shape)</td><td>struct {int a; float b} ≡ struct {int x; float y}</td></tr>
+                <tr><td><b>Name equivalence</b></td><td>Two types are equivalent only if they are the same declaration</td><td>Above two structs are NOT equivalent in name-equivalence languages (e.g., Pascal)</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="topic">
+            <div class="topic-title">4. Polymorphic Functions</div>
+            <table class="notes-table">
+              <thead><tr><th>Type</th><th>Description</th><th>Example</th></tr></thead>
+              <tbody>
+                <tr><td><b>Ad-hoc (Overloading)</b></td><td>Same function name, different parameter types — resolved at compile time</td><td>int add(int,int) and float add(float,float)</td></tr>
+                <tr><td><b>Parametric (Generics)</b></td><td>Function works on any type via a type parameter</td><td>T max(T a, T b) in C++/Java generics</td></tr>
+                <tr><td><b>Subtype</b></td><td>A function accepting a base type also accepts derived types (Liskov substitution)</td><td>Passing a Dog where Animal is expected</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="topic">
+            <div class="topic-title">5. Run-Time Environment &amp; Storage Allocation</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">The <b>run-time environment</b> is the arrangement of memory and data structures that a running program uses. The compiler is responsible for generating code that manages this environment correctly.</p>
+            <table class="notes-table">
+              <thead><tr><th>Strategy</th><th>Allocation at</th><th>Data stored</th><th>Key property</th></tr></thead>
+              <tbody>
+                <tr><td><b>Static</b></td><td>Compile time</td><td>Global variables, static locals, code</td><td>Fixed address; no runtime overhead; no recursion support</td></tr>
+                <tr><td><b>Stack</b></td><td>Runtime (call/return)</td><td>Local variables, parameters, return addresses (activation records)</td><td>LIFO; supports recursion; automatically reclaimed on return</td></tr>
+                <tr><td><b>Heap</b></td><td>Runtime (explicit alloc)</td><td>Dynamically allocated objects (malloc/new)</td><td>Manual or GC-managed; can fragment; most flexible lifetime</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="topic">
+            <div class="topic-title">6. Activation Records</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">An <b>activation record</b> (or stack frame) is the block of memory pushed onto the stack when a function is called. It holds everything the function needs during its execution.</p>
+            <table class="notes-table">
+              <thead><tr><th>Field</th><th>Contents</th></tr></thead>
+              <tbody>
+                <tr><td>Return value</td><td>Space for the function's return value</td></tr>
+                <tr><td>Actual parameters</td><td>Values (or references) of arguments passed by the caller</td></tr>
+                <tr><td>Control link</td><td>Pointer to the caller's activation record</td></tr>
+                <tr><td>Access link</td><td>Pointer to non-local data (for nested scopes)</td></tr>
+                <tr><td>Saved registers / machine status</td><td>Caller's register values to restore on return</td></tr>
+                <tr><td>Local variables</td><td>Variables declared inside the function</td></tr>
+                <tr><td>Temporaries</td><td>Intermediate values generated by the compiler</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="topic">
+            <div class="topic-title">Stack vs Heap — Comparison</div>
+            <table class="notes-table">
+              <thead><tr><th>Property</th><th>Stack Allocation</th><th>Heap Allocation</th></tr></thead>
+              <tbody>
+                <tr><td>Managed by</td><td>Compiler automatically</td><td>Programmer (or GC)</td></tr>
+                <tr><td>Size at compile time</td><td>Must be known</td><td>Can be determined at runtime</td></tr>
+                <tr><td>Lifetime</td><td>Until function returns</td><td>Until explicitly freed</td></tr>
+                <tr><td>Supports recursion</td><td>Yes</td><td>Yes</td></tr>
+                <tr><td>Fragmentation</td><td>None</td><td>Possible</td></tr>
+                <tr><td>Speed</td><td>Faster (pointer bump)</td><td>Slower (allocator overhead)</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="notes-box exam">
+            <div class="notes-box-title exam">// Short notes frequently asked</div>
             <ul class="qlist">
-              <li><b>Type checker</b> — semantic analysis phase that verifies type consistency of operations.</li>
-              <li><b>Static type checking</b> — at compile time (C, Java). <b>Dynamic</b> — at runtime (Python).</li>
-              <li><b>Type equivalence</b> — Structural (same shape) vs Name equivalence (same declaration).</li>
-              <li><b>Polymorphism</b> — function works on multiple types. Ad-hoc (overloading), parametric (generics), subtype.</li>
+              <li><b>Dynamic storage allocation</b> — memory requested at runtime via malloc/new; managed by the heap allocator; must be explicitly freed to avoid leaks.</li>
+              <li><b>Error detection and recovery</b> — compiler detects type mismatches, undeclared identifiers, scope violations; recovery strategies include panic mode (skip to sync token), phrase-level correction, error productions.</li>
             </ul>
           </div>
-          <div class="topic">
-            <div class="topic-title">Storage Allocation Strategies (high priority)</div>
-            <ul class="qlist">
-              <li><b>Static allocation</b> — memory fixed at compile time. No recursion. e.g. global vars, FORTRAN.</li>
-              <li><b>Stack allocation</b> — activation records pushed/popped on call/return. Supports recursion. LIFO.</li>
-              <li><b>Heap allocation</b> — dynamic memory via malloc/new. Flexible but needs GC or manual free.</li>
-            </ul>
-          </div>
-          <div class="topic">
-            <div class="topic-title">Activation Record (AR)</div>
-            <ul class="qlist">
-              <li>Contains: return value, actual parameters, control link (caller's AR), access link, saved machine state, local variables, temporaries.</li>
-              <li><b>Control link</b> — points to caller's AR (dynamic chain).</li>
-              <li><b>Access link</b> — points to AR of statically enclosing scope (static chain).</li>
-            </ul>
-          </div>
-          <div class="takeaway"><b>Exam tip:</b> Draw the activation record layout and explain stack vs heap with a diagram. Storage allocation appears in almost every paper it shows up in.</div>
+
+          <div class="takeaway"><b>Exam focus:</b> Storage allocation strategies (static/stack/heap) and the activation record model are the two most reliably tested topics in Unit 3.</div>
           <div class="pager" id="pager-notes-unit3"></div>
         </section>
 
         <!-- NOTES UNIT 4 -->
         <section class="page" data-id="notes-unit4">
           <div class="unit-eyebrow">Unit 4 — Notes</div>
-          <h2 class="unit-title">Code Generation</h2>
-          <p class="unit-intro">Intermediate representations, basic blocks, flow graphs, and DAGs — all practical, all numerical.</p>
+          <h2 class="unit-title">Intermediate Code Generation &amp; Code Generation</h2>
+          <p class="unit-intro">The bridge from front-end analysis to target code: 3AC, quadruples/triples, DAGs, basic blocks, flow graphs, register allocation, and peephole optimisation. Highly practical and consistently worth ~25% of the paper.</p>
           <div class="stat-row">
-            <div class="stat"><div class="stat-val">8</div><div class="stat-label">key topics to know</div></div>
+            <div class="stat"><div class="stat-val">20–35</div><div class="stat-label">marks per paper (avg ~28)</div></div>
             <div class="stat"><div class="stat-val">~25%</div><div class="stat-label">exam weight</div></div>
-            <div class="stat"><div class="stat-val">★★★</div><div class="stat-label">difficulty level</div></div>
+            <div class="stat"><div class="stat-val">★★★</div><div class="stat-label">difficulty</div></div>
           </div>
+
           <div class="topic">
-            <div class="topic-title">Three-Address Code (3AC)</div>
-            <ul class="qlist">
-              <li>At most one operator per instruction. Form: <code>x = y op z</code></li>
-              <li><b>Quadruples</b> — (op, arg1, arg2, result). Easy to reorder; preferred in optimising compilers.</li>
-              <li><b>Triples</b> — (op, arg1, arg2); result implicit as index. Compact but hard to reorder.</li>
-              <li><b>Indirect triples</b> — list of pointers to triples; reordering easier than triples.</li>
-              <li><b>Back patching</b> — filling in incomplete jump targets once the destination is known.</li>
+            <div class="topic-title">1. Intermediate Code Generation (ICG)</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;"><b>ICG</b> translates the type-checked AST into a machine-independent low-level representation — most commonly <b>Three-Address Code (TAC)</b> — that sits between source and final assembly.</p>
+            <table class="notes-table">
+              <thead><tr><th>Reason ICG exists</th><th>Benefit</th></tr></thead>
+              <tbody>
+                <tr><td>Retargetability</td><td>M frontends + N backends → only M+N components, not M×N full compilers</td></tr>
+                <tr><td>Machine-independent optimisation</td><td>Write optimisations once against the IR; reuse on every target</td></tr>
+                <tr><td>Simplification</td><td>Flat uniform instructions easier to analyse than deeply nested AST</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="topic">
+            <div class="topic-title">2. Three-Address Code (TAC / 3AC)</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">Every 3AC statement has at most <b>three operands</b>: one operator, up to two sources, one destination.</p>
+            <div class="notes-code-block">Forms:
+  x = y op z         (binary)
+  x = op y           (unary)
+  x = y              (copy)
+  goto L             (unconditional jump)
+  if x relop y goto L (conditional jump)
+  param x / call p,n / return y  (procedure)</div>
+            <div class="notes-box exam" style="margin-top:10px;">
+              <div class="notes-box-title exam">// Generate 3AC for: P = (X + Y) + (X - C)</div>
+              <div class="notes-code-block">t1 = X + Y
+t2 = X - C
+t3 = t1 + t2
+P  = t3</div>
+            </div>
+            <table class="notes-table" style="margin-top:12px;">
+              <thead><tr><th>Representation</th><th>Fields</th><th>Key note</th></tr></thead>
+              <tbody>
+                <tr><td><b>Quadruples</b></td><td>(op, arg1, arg2, result)</td><td>Result stored explicitly — easy to reorder; preferred in optimising compilers</td></tr>
+                <tr><td><b>Triples</b></td><td>(op, arg1, arg2) — result implicit by position</td><td>Smaller but hard to reorder (position encodes identity)</td></tr>
+                <tr><td><b>Indirect Triples</b></td><td>Triples + a pointer array</td><td>Allows reordering via pointer manipulation</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="topic">
+            <div class="topic-title">3. Basic Blocks &amp; Flow Graphs</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">A <b>basic block</b> is a maximal sequence of consecutive 3AC instructions with: one entry (first instruction only) and one exit (last instruction only) — no branches in the middle.</p>
+            <div class="notes-box exam">
+              <div class="notes-box-title exam">// Partitioning 3AC into basic blocks</div>
+              <ul class="qlist">
+                <li>1. Identify <b>leaders</b>: first instruction, any jump target, any instruction following a jump</li>
+                <li>2. Each leader starts a new basic block; the block runs to just before the next leader</li>
+              </ul>
+            </div>
+            <p style="font-size:14px;line-height:1.7;margin-top:10px;margin-bottom:6px;">A <b>flow graph</b> is a directed graph where nodes = basic blocks and edges represent possible control flow between them (sequential fall-through or jumps).</p>
+            <div class="notes-box tip">
+              <div class="notes-box-title tip">// Flow graph for: i=1; sum=0; while(i&lt;=10){ sum+=i; i++; }</div>
+              <div class="notes-code-block">B1: i = 1; sum = 0           (entry)
+B2: if i &gt; 10 goto B4        (loop condition)
+B3: sum = sum + i; i = i+1; goto B2   (loop body)
+B4: ...                      (exit)
+Edges: B1→B2, B2→B3, B2→B4, B3→B2</div>
+            </div>
+          </div>
+
+          <div class="topic">
+            <div class="topic-title">4. Directed Acyclic Graphs (DAG)</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">A <b>DAG</b> represents a basic block compactly. Leaves = operands (variables/constants); interior nodes = operators. Identical sub-expressions share nodes, automatically exposing common-subexpression elimination.</p>
+            <div class="notes-box exam">
+              <div class="notes-box-title exam">// DAG for: a = (a*b+c) − (a*b+c)</div>
+              <p style="font-size:13px;line-height:1.6;margin:0;">Both (a*b+c) occurrences map to the <em>same</em> interior node — the subtraction gets two identical children, so the result simplifies to 0 without recomputing a*b+c twice.</p>
+            </div>
+            <div class="notes-box tip" style="margin-top:10px;">
+              <div class="notes-box-title tip">// DAG for: D=B*C; E=A+B; B=B+C; A=E-D</div>
+              <div class="notes-code-block">Nodes created:
+  n1=B*C (→D), n2=A+B (→E), n3=B+C (→B), n4=n2-n1 (→A)
+B and A are reassigned — DAG tracks live (latest) values per variable</div>
+            </div>
+            <ul class="qlist" style="margin-top:10px;">
+              <li><b>Applications of DAG:</b> common-subexpression elimination, dead-code detection (no uses of a node), simplified code regeneration</li>
             </ul>
           </div>
+
           <div class="topic">
-            <div class="topic-title">Basic Blocks &amp; Flow Graphs</div>
-            <ul class="qlist">
-              <li><b>Basic block</b> — maximal sequence of instructions with one entry, one exit, no internal jumps.</li>
-              <li><b>Leaders</b> — first instruction, any branch target, instruction after a branch.</li>
-              <li><b>Flow graph</b> — directed graph where nodes = basic blocks, edges = control flow.</li>
-            </ul>
+            <div class="topic-title">5. Back Patching</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;"><b>Back patching</b> is a one-pass technique for generating 3AC for boolean expressions and control-flow (if/while). Jump targets are left blank (unknown) during translation; they are filled in ("patched") once the target address is known.</p>
+            <div class="notes-box exam">
+              <div class="notes-box-title exam">// Key lists used in back patching</div>
+              <ul class="qlist">
+                <li><b>truelist</b> — list of jump instructions that must jump to the target when condition is TRUE</li>
+                <li><b>falselist</b> — jump to target when condition is FALSE</li>
+                <li><b>nextlist</b> — jumps that go to the instruction immediately after the current construct</li>
+                <li><b>backpatch(list, i)</b> — fills each instruction in list with target address i</li>
+              </ul>
+            </div>
           </div>
+
           <div class="topic">
-            <div class="topic-title">DAG (Directed Acyclic Graph)</div>
-            <ul class="qlist">
-              <li>Represents computations in a basic block. Leaves = inputs; interior nodes = operators.</li>
-              <li>Detects <b>common sub-expressions</b> automatically (shared nodes).</li>
-              <li>Algorithm: for each instruction x=y op z, find/create nodes for y,z; create node for op; label with x.</li>
-              <li>Applications: CSE elimination, dead code removal, algebraic simplification.</li>
-            </ul>
+            <div class="topic-title">6. Register Allocation &amp; Peephole Optimisation</div>
+            <table class="notes-table">
+              <thead><tr><th>Topic</th><th>Key ideas</th></tr></thead>
+              <tbody>
+                <tr><td><b>Register allocation</b></td><td>Assign variables to the limited set of CPU registers to minimise memory loads/stores. Graph colouring is the classical algorithm: interference graph nodes = variables, edges = live-at-same-time; k-colouring = k registers.</td></tr>
+                <tr><td><b>Peephole optimisation</b></td><td>Examine a small sliding window ("peephole") of generated instructions and replace with cheaper equivalents. Local, fast, and target-specific.</td></tr>
+              </tbody>
+            </table>
+            <div class="notes-box tip" style="margin-top:10px;">
+              <div class="notes-box-title tip">// Classic peephole transformations</div>
+              <ul class="qlist">
+                <li><b>Redundant load elimination:</b> ST x, R0 / LD R0, x → remove the load if register still holds x</li>
+                <li><b>Strength reduction:</b> x = x * 2 → x = x + x  or  x &lt;&lt; 1</li>
+                <li><b>Unreachable code removal:</b> instructions after an unconditional goto</li>
+                <li><b>Flow-of-control optimisation:</b> goto L where L: goto L2 → goto L2</li>
+                <li><b>Algebraic simplification:</b> x = x + 0 → remove; x = x * 1 → remove</li>
+              </ul>
+            </div>
           </div>
-          <div class="topic">
-            <div class="topic-title">Register Allocation &amp; Peephole</div>
-            <ul class="qlist">
-              <li><b>Register allocation</b> — assign variables to registers; use graph colouring (interference graph).</li>
-              <li><b>Peephole optimisation</b> — small sliding window over code; eliminates redundant loads/stores, unreachable code, jumps to jumps.</li>
-            </ul>
-          </div>
-          <div class="takeaway"><b>Exam tip:</b> Practice DAG construction and 3AC generation by hand. Draw the flow graph for while/for loops step by step.</div>
+
+          <div class="takeaway"><b>Exam focus:</b> Practice generating 3AC and drawing DAGs / flow graphs by hand — this unit is guaranteed to appear as a numerical or diagram problem every year.</div>
           <div class="pager" id="pager-notes-unit4"></div>
         </section>
 
@@ -2772,53 +3031,119 @@ int main() { yylex(); return 0; }</pre>
         <section class="page" data-id="notes-unit5">
           <div class="unit-eyebrow">Unit 5 — Notes</div>
           <h2 class="unit-title">Code Optimization</h2>
-          <p class="unit-intro">Techniques to improve generated code without changing its meaning — mostly theoretical, high repetition in exams.</p>
+          <p class="unit-intro">Transforming code to run faster or use less memory without changing its observable behaviour. Reliable, mostly theoretical, and highly repeated in exams.</p>
           <div class="stat-row">
-            <div class="stat"><div class="stat-val">6</div><div class="stat-label">key topics to know</div></div>
+            <div class="stat"><div class="stat-val">12–14</div><div class="stat-label">marks per paper (peak: 21)</div></div>
             <div class="stat"><div class="stat-val">~12%</div><div class="stat-label">exam weight</div></div>
-            <div class="stat"><div class="stat-val">★★☆</div><div class="stat-label">difficulty level</div></div>
+            <div class="stat"><div class="stat-val">★★☆</div><div class="stat-label">difficulty</div></div>
           </div>
+
           <div class="topic">
-            <div class="topic-title">Sources of Optimization (most repeated topic)</div>
-            <ul class="qlist">
-              <li><b>Common Sub-expression Elimination (CSE)</b> — avoid recomputing the same expression.</li>
-              <li><b>Copy Propagation</b> — replace copies (x=y) with the original variable y.</li>
-              <li><b>Dead Code Elimination</b> — remove code whose result is never used.</li>
-              <li><b>Constant Folding</b> — evaluate constant expressions at compile time. e.g. 3+4 → 7</li>
-              <li><b>Strength Reduction</b> — replace expensive op with cheaper one. e.g. x*2 → x+x or x&lt;&lt;1</li>
-            </ul>
+            <div class="topic-title">1. Introduction — What &amp; Why</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;"><b>Code optimization</b> transforms intermediate (or target) code into a semantically equivalent version that is faster, smaller, or more energy-efficient. The <b>golden rule</b>: must never change the observable output for any valid input.</p>
+            <table class="notes-table">
+              <thead><tr><th>Scope</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><b>Local</b></td><td>Within a single basic block (DAG-based CSE, peephole)</td></tr>
+                <tr><td><b>Global (intra-proc.)</b></td><td>Across basic blocks within a procedure (loop optimisations, global CSE)</td></tr>
+                <tr><td><b>Interprocedural</b></td><td>Across function call boundaries (inlining, whole-program analysis)</td></tr>
+              </tbody>
+            </table>
+            <div class="notes-box exam" style="margin-top:10px;">
+              <div class="notes-box-title exam">// Three criteria every optimisation must satisfy</div>
+              <ul class="qlist">
+                <li><b>Correctness (Safety):</b> must never change the program's meaning</li>
+                <li><b>Profitability:</b> should genuinely improve time / space in typical cases</li>
+                <li><b>Compile-time feasibility:</b> the analysis to justify it must itself be computable efficiently</li>
+              </ul>
+            </div>
           </div>
+
           <div class="topic">
-            <div class="topic-title">Loop Optimisations</div>
-            <ul class="qlist">
-              <li><b>Loop-invariant code motion</b> — move computations that don't change across iterations outside the loop.</li>
-              <li><b>Induction variable elimination</b> — simplify variables that change by a fixed amount each iteration.</li>
-              <li><b>Loop unrolling</b> — replicate loop body to reduce branch overhead.</li>
-            </ul>
+            <div class="topic-title">2. Sources of Optimisation in Basic Blocks <span class="tag">most repeated</span></div>
+            <table class="notes-table">
+              <thead><tr><th>Transformation</th><th>What it does</th><th>Example</th></tr></thead>
+              <tbody>
+                <tr><td><b>Common Sub-expression Elimination (CSE)</b></td><td>Avoid recomputing an expression whose operands have not changed</td><td>a = b+c; …; d = b+c → d = a (if b,c unchanged)</td></tr>
+                <tr><td><b>Copy Propagation</b></td><td>After x = y, replace subsequent uses of x with y</td><td>x=y; z=x+1 → z=y+1</td></tr>
+                <tr><td><b>Dead Code Elimination</b></td><td>Remove assignments to variables that are never subsequently used</td><td>x = 5; (x never read) → remove</td></tr>
+                <tr><td><b>Constant Folding</b></td><td>Evaluate constant expressions at compile time</td><td>3 + 4 → 7 at compile time</td></tr>
+                <tr><td><b>Strength Reduction</b></td><td>Replace expensive operation with cheaper equivalent</td><td>x * 2 → x + x  or  x &lt;&lt; 1</td></tr>
+                <tr><td><b>Algebraic Simplification</b></td><td>Apply algebraic identities</td><td>x * 1 → x;  x + 0 → x;  x ** 2 → x * x</td></tr>
+              </tbody>
+            </table>
           </div>
+
           <div class="topic">
-            <div class="topic-title">Three Areas of Optimisation</div>
-            <ul class="qlist">
-              <li><b>Local</b> — within a single basic block. e.g. peephole, CSE in block.</li>
-              <li><b>Global</b> — across basic blocks in a function. Uses data flow analysis.</li>
-              <li><b>Inter-procedural</b> — across function boundaries. Most expensive.</li>
-            </ul>
+            <div class="topic-title">3. Loop Optimisations</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">Loops are the most profitable optimisation target since a transformation inside a loop affects every iteration.</p>
+            <table class="notes-table">
+              <thead><tr><th>Optimisation</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><b>Loop-invariant code motion</b></td><td>Move computations that produce the same result on every iteration to before the loop (into the pre-header)</td></tr>
+                <tr><td><b>Induction variable elimination</b></td><td>Simplify or eliminate variables that change by a fixed amount each iteration</td></tr>
+                <tr><td><b>Strength reduction (loop)</b></td><td>Replace multiplication by an induction variable with addition: i*c → accumulate with +c</td></tr>
+                <tr><td><b>Loop unrolling</b></td><td>Replicate the loop body N times to reduce branch/counter overhead</td></tr>
+              </tbody>
+            </table>
+            <div class="notes-box exam" style="margin-top:10px;">
+              <div class="notes-box-title exam">// Loop-invariant code motion example</div>
+              <div class="notes-code-block">Before:              After (t = x+y moved outside):
+while (i &lt; n) {      t = x + y;
+  a = x + y;         while (i &lt; n) {
+  b = a * i;           b = t * i;
+  i++;                 i++;
+}                    }</div>
+            </div>
           </div>
+
           <div class="topic">
-            <div class="topic-title">Global Data Flow Analysis</div>
-            <ul class="qlist">
-              <li>Computes properties of the program at each point using <b>data flow equations</b>.</li>
-              <li><b>Reaching definitions</b> — which assignments can reach a given point.</li>
-              <li><b>Live variable analysis</b> — which variables will be used after this point.</li>
-              <li>Solved iteratively (forward or backward) until a fixed point is reached.</li>
-            </ul>
+            <div class="topic-title">4. Code-Improving Transformations</div>
+            <table class="notes-table">
+              <thead><tr><th>Type</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><b>Local transformation</b></td><td>Applied within a single basic block; uses only local information; examples: peephole, DAG-based CSE, constant folding</td></tr>
+                <tr><td><b>Global transformation</b></td><td>Applied across the whole procedure's flow graph; requires data-flow analysis; examples: global CSE, loop-invariant motion</td></tr>
+              </tbody>
+            </table>
           </div>
-          <div class="takeaway"><b>Exam tip:</b> Learn the names and one-line definitions of all sources of optimisation — they appear as "write a short note on" questions almost every year.</div>
+
+          <div class="topic">
+            <div class="topic-title">5. Global Data-Flow Analysis</div>
+            <p style="font-size:14px;line-height:1.7;margin-bottom:10px;"><b>Data-flow analysis</b> propagates information about the program's values and variable definitions across basic blocks using iterative fixed-point equations.</p>
+            <table class="notes-table">
+              <thead><tr><th>Analysis</th><th>What it computes</th><th>Used for</th></tr></thead>
+              <tbody>
+                <tr><td><b>Reaching definitions</b></td><td>Which definitions of a variable may reach a program point</td><td>Constant propagation, dead code detection</td></tr>
+                <tr><td><b>Live variable analysis</b></td><td>Which variables are live (will be used before being overwritten) at each point</td><td>Register allocation, dead assignment removal</td></tr>
+                <tr><td><b>Available expressions</b></td><td>Which expressions have been computed and not invalidated on every path to a point</td><td>Global CSE</td></tr>
+              </tbody>
+            </table>
+            <div class="notes-box tip" style="margin-top:10px;">
+              <div class="notes-box-title tip">// Data-flow equations (reaching definitions)</div>
+              <div class="notes-code-block">OUT[B] = GEN[B] ∪ (IN[B] − KILL[B])
+IN[B]  = ∪ OUT[P]  for all predecessors P of B
+Solve iteratively until no set changes (fixed point)</div>
+            </div>
+          </div>
+
+          <div class="topic">
+            <div class="topic-title">6. Principal Areas of Code Optimization (Master List)</div>
+            <table class="notes-table">
+              <thead><tr><th>#</th><th>Area</th><th>Techniques</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Redundancy elimination</td><td>CSE, copy propagation, constant folding/propagation</td></tr>
+                <tr><td>2</td><td>Dead code removal</td><td>Dead assignment elimination, unreachable code removal</td></tr>
+                <tr><td>3</td><td>Loop optimisation</td><td>Invariant code motion, induction variable elim., unrolling, strength reduction</td></tr>
+                <tr><td>4</td><td>Machine-level</td><td>Peephole, register allocation, instruction scheduling</td></tr>
+                <tr><td>5</td><td>Procedure level</td><td>Inlining, tail-call optimisation, interprocedural analysis</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="takeaway"><b>Exam focus:</b> Learn the names and one-line definitions of all sources of optimisation in basic blocks — they appear as "write a short note on" questions almost every year. Also know loop-invariant code motion with a worked example.</div>
           <div class="pager" id="pager-notes-unit5"></div>
         </section>
-
-      </div><!-- end content-wrap -->
-    </div><!-- end main -->
   </div><!-- end flex row -->
 </div><!-- end view-notes -->
 
